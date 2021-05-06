@@ -1,0 +1,3 @@
+[submodule "ot-br-posix"]
+	path = ot-br-posix
+	url = https://github.com/openthread/ot-br-posix
