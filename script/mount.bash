@@ -21,9 +21,8 @@
 # SOFTWARE.
 
 #
-# Script to determine offsets and mount a provided raspbian image to a provided location
-# This requires fdisk and permission to run the `mount` command, which is provided when
-# run from the docker container.
+# Script to mount a provided raspbian image to a provided location
+#
 
 set -x
 
@@ -55,8 +54,8 @@ LOOP_BASE=$(losetup -f -P --show $1)
 echo "Attached base loopback at: $LOOP_BASE"
 
 # Fetch and parse partition info
-P1_INFO=($$(fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p1))
-P2_INFO=($$(fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p2))
+P1_INFO=($`fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p1`)
+P2_INFO=($`fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p2`)
 
 P1_NAME=${LOOP_BASE}p1
 P2_NAME=${LOOP_BASE}p2

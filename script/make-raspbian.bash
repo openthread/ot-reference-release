@@ -84,7 +84,7 @@ configure_apt_source
 
 echo "127.0.0.1 \$(hostname)" >> /etc/hosts
 chown -R pi:pi /home/pi/repo
-cd /home/pi/repo
+cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
 apt-get install -y --no-install-recommends nodejs npm
@@ -112,7 +112,7 @@ OTBR_BUILD_DEPS='apt-utils build-essential psmisc ninja-build cmake wget ca-cert
   libnetfilter-queue-dev'
 OTBR_DOCKER_DEPS='git ca-certificates'
 
-cd /home/pi/repo
+cd /home/pi/repo/ot-br-posix
 mv ./script /tmp
 mv ./etc /tmp
 find . -delete
@@ -141,13 +141,13 @@ sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
       sudo touch "$IMAGE_DIR"/boot/ssh && sync
       LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img  --output NAME -n)
       sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
-      sudo cp -P $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
+      sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
       sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
       sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
       sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
-      sudo umount -lf "${LOOP_NAME}p1"
-      sudo umount -lf "${LOOP_NAME}p2"
-      sudo losetup -d "${LOOP_NAME}"
+#      sudo umount -lf "${LOOP_NAME}p1"
+#      sudo umount -lf "${LOOP_NAME}p2"
+#      sudo losetup -d "${LOOP_NAME}"
   )
 }
 
