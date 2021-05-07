@@ -1,3 +1,6 @@
 [submodule "ot-br-posix"]
 	path = ot-br-posix
 	url = https://github.com/openthread/ot-br-posix
+[submodule "ot-nrf528xx"]
+	path = ot-nrf528xx
+	url = https://github.com/openthread/ot-nrf528xx
