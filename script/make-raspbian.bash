@@ -34,7 +34,7 @@ set -x
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
 echo "IMAGE_URL=${IMAGE_URL?}"
 echo "IN_CHINA=$IN_CHINA"
-echo "SD_CARD=${SD_CARD?}"
+echo "OUTPUT_DIR=${OUTPUT_DIR?}"
 
 BUILD_TARGET=raspbian-gcc
 BUILD_OPTIONS='REFERENCE_DEVICE=1 '
@@ -146,9 +146,16 @@ sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
       LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img  --output NAME -n)
       sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
       sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
-      sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
+      if [[ ! -f /usr/bin/pishrink.sh ]]; then
+        sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
+      fi
       sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
-      sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
+      if [[ $SD_CARD ]]; then
+        sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
+      fi
+      IMG_ZIP_FILE=otbr."$(date +%Y%m%d)".img.zip
+      zip "$IMG_ZIP_FILE" "$STAGE_DIR/otbr.img"
+      mv "$IMG_ZIP_FILE" "$OUTPUT_DIR"
       sudo umount -lf "${LOOP_NAME}p1"
       sudo umount -lf "${LOOP_NAME}p2"
       sudo losetup -d "${LOOP_NAME}"

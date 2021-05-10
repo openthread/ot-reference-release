@@ -30,6 +30,8 @@
 set -e
 set -x
 
+echo "OUTPUT_DIR=${OUTPUT_DIR?}"
+
 PLATFORM=nrf52840
 
 BUILD_OPTIONS='-DOT_BOOTLOADER=USB '
@@ -56,9 +58,8 @@ cd ot-nrf528xx
 
 NRFUTIL=/tmp/nrfutil-linux
 if [ ! -f $NRFUTIL ]; then
-  wget https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux
-  chmod +x nrfutil-linux
-  mv nrfutil-linux $NRFUTIL
+  wget https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux -o $NRFUTIL
+  chmod +x $NRFUTIL
 fi
 
 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "$BUILD_OPTIONS"
@@ -77,4 +78,7 @@ make_zip "ot-rcp"
 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "$BUILD_OPTIONS"
 make_zip "ot-cli-ftd"
 mv ot-cli-ftd.zip ot-cli-ftd-1.1.zip
+
+mkdir -p "$OUTPUT_DIR"
+mv ./*.zip "$OUTPUT_DIR"
 

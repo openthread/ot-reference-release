@@ -32,8 +32,6 @@ set -x
 
 echo "OUTPUT_DIR=${OUTPUT_DIR?}"
 
-OUTPUT_DIR=$(realpath "$OUTPUT_DIR")
-
 mkdir -p "$OUTPUT_DIR"/ot-comm
 
 (
