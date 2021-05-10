@@ -63,7 +63,7 @@ main() {
 
   python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
 
-  cat >"$STAGE_DIR"/check.sh <<EOF
+  cat >"$STAGE_DIR"/setup.sh <<EOF
 #!/bin/sh
 set -ex
 
@@ -97,7 +97,11 @@ pip3 install scikit-build
 pip3 install cmake==3.10.3
 cmake --version
 
-su -c 'RELEASE=1 $BUILD_OPTIONS script/setup' pi
+su -c 'RELEASE=1 $BUILD_OPTIONS script/setup' pi || true
+
+cd /home/pi/repo/
+./script/make-commissioner.bash
+
 sync
 EOF
 
@@ -133,10 +137,10 @@ sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
       sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
       sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
       sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
-      sudo cp -v "$STAGE_DIR"/check.sh "$IMAGE_DIR"/home/pi/check.sh
+      sudo cp -v "$STAGE_DIR"/setup.sh "$IMAGE_DIR"/home/pi/setup.sh
       sudo cp -v "$STAGE_DIR"/cleanup.sh "$IMAGE_DIR"/home/pi/cleanup.sh
       sudo ./qemu-setup.sh "$IMAGE_DIR"
-      sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/check.sh || true
+      sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/setup.sh || true
       sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/cleanup.sh
       sudo touch "$IMAGE_DIR"/boot/ssh && sync
       LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img  --output NAME -n)
@@ -145,9 +149,9 @@ sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
       sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
       sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
       sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
-#      sudo umount -lf "${LOOP_NAME}p1"
-#      sudo umount -lf "${LOOP_NAME}p2"
-#      sudo losetup -d "${LOOP_NAME}"
+      sudo umount -lf "${LOOP_NAME}p1"
+      sudo umount -lf "${LOOP_NAME}p2"
+      sudo losetup -d "${LOOP_NAME}"
   )
 }
 
