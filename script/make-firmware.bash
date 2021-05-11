@@ -58,8 +58,8 @@ cd ot-nrf528xx
 
 NRFUTIL=/tmp/nrfutil-linux
 if [ ! -f $NRFUTIL ]; then
-  wget https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux -o $NRFUTIL
-  chmod +x $NRFUTIL
+	wget https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux -o $NRFUTIL
+	chmod +x $NRFUTIL
 fi
 
 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "$BUILD_OPTIONS"
@@ -67,8 +67,8 @@ fi
 $NRFUTIL keys generate private.pem
 
 make_zip() {
-  arm-none-eabi-objcopy -O ihex ./build/bin/"$1" "$1".hex
-  $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1".hex --key-file private.pem "$1".zip
+	arm-none-eabi-objcopy -O ihex ./build/bin/"$1" "$1".hex
+	$NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1".hex --key-file private.pem "$1".zip
 }
 
 make_zip "ot-cli-ftd"
@@ -81,4 +81,3 @@ mv ot-cli-ftd.zip ot-cli-ftd-1.1.zip
 
 mkdir -p "$OUTPUT_DIR"
 mv ./*.zip "$OUTPUT_DIR"
-

@@ -35,15 +35,15 @@ echo "OUTPUT_DIR=${OUTPUT_DIR?}"
 mkdir -p "$OUTPUT_DIR"/ot-comm
 
 (
-  cd ot-br-posix/third_party/openthread/repo/tools/harness-thci
-  cp OpenThread_BR.py "$OUTPUT_DIR"
-  cp OpenThread.py "$OUTPUT_DIR"
+	cd ot-br-posix/third_party/openthread/repo/tools/harness-thci
+	cp OpenThread_BR.py "$OUTPUT_DIR"
+	cp OpenThread.py "$OUTPUT_DIR"
 )
 
 (
-  cd ot-commissioner/tools/commissioner_thci
-  cp commissioner.py "$OUTPUT_DIR"/ot-comm
-  cp commissioner_impl.py "$OUTPUT_DIR"/ot-comm
+	cd ot-commissioner/tools/commissioner_thci
+	cp commissioner.py "$OUTPUT_DIR"/ot-comm
+	cp commissioner_impl.py "$OUTPUT_DIR"/ot-comm
 )
 
 sync

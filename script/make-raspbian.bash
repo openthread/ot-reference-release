@@ -30,7 +30,6 @@
 set -e
 set -x
 
-
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
 echo "IMAGE_URL=${IMAGE_URL?}"
 echo "IN_CHINA=$IN_CHINA"
@@ -51,19 +50,19 @@ BUILD_OPTIONS+='OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON" '
 TOOLS_HOME=$HOME/.cache/tools
 
 main() {
-  BUILD_TARGET=$BUILD_TARGET IMAGE_URL=$IMAGE_URL sh ot-br-posix/tests/scripts/bootstrap.sh
+	BUILD_TARGET=$BUILD_TARGET IMAGE_URL=$IMAGE_URL sh ot-br-posix/tests/scripts/bootstrap.sh
 
-  IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
-  STAGE_DIR=/tmp/raspbian
-  IMAGE_DIR=/media/rpi
-  IMAGE_FILE="$TOOLS_HOME"/images/"$IMAGE_NAME".img
+	IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
+	STAGE_DIR=/tmp/raspbian
+	IMAGE_DIR=/media/rpi
+	IMAGE_FILE="$TOOLS_HOME"/images/"$IMAGE_NAME".img
 
-  [ -d "$STAGE_DIR" ] || mkdir -p "$STAGE_DIR"
-  cp -v "$IMAGE_FILE" "$STAGE_DIR"/raspbian.img
+	[ -d "$STAGE_DIR" ] || mkdir -p "$STAGE_DIR"
+	cp -v "$IMAGE_FILE" "$STAGE_DIR"/raspbian.img
 
-  python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
+	python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
 
-  cat >"$STAGE_DIR"/setup.sh <<EOF
+	cat >"$STAGE_DIR"/setup.sh <<EOF
 #!/bin/sh
 set -ex
 
@@ -105,7 +104,7 @@ cd /home/pi/repo/
 sync
 EOF
 
-  cat >"$STAGE_DIR"/cleanup.sh <<EOF
+	cat >"$STAGE_DIR"/cleanup.sh <<EOF
 #!/bin/sh
 set -e
 set -x
@@ -129,37 +128,37 @@ rm -rf /var/lib/apt/lists/*
 sync
 EOF
 
-sudo mkdir -p "$IMAGE_DIR"
-sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
+	sudo mkdir -p "$IMAGE_DIR"
+	sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
 
-  (
-      cd docker-rpi-emu/scripts
-      sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
-      sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
-      sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
-      sudo cp -v "$STAGE_DIR"/setup.sh "$IMAGE_DIR"/home/pi/setup.sh
-      sudo cp -v "$STAGE_DIR"/cleanup.sh "$IMAGE_DIR"/home/pi/cleanup.sh
-      sudo ./qemu-setup.sh "$IMAGE_DIR"
-      sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/setup.sh || true
-      sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/cleanup.sh
-      sudo touch "$IMAGE_DIR"/boot/ssh && sync
-      LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img  --output NAME -n)
-      sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
-      sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
-      if [[ ! -f /usr/bin/pishrink.sh ]]; then
-        sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
-      fi
-      sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
-      if [[ $SD_CARD ]]; then
-        sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
-      fi
-      IMG_ZIP_FILE=otbr."$(date +%Y%m%d)".img.zip
-      zip "$IMG_ZIP_FILE" "$STAGE_DIR/otbr.img"
-      mv "$IMG_ZIP_FILE" "$OUTPUT_DIR"
-      sudo umount -lf "${LOOP_NAME}p1"
-      sudo umount -lf "${LOOP_NAME}p2"
-      sudo losetup -d "${LOOP_NAME}"
-  )
+	(
+		cd docker-rpi-emu/scripts
+		sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
+		sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
+		sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
+		sudo cp -v "$STAGE_DIR"/setup.sh "$IMAGE_DIR"/home/pi/setup.sh
+		sudo cp -v "$STAGE_DIR"/cleanup.sh "$IMAGE_DIR"/home/pi/cleanup.sh
+		sudo ./qemu-setup.sh "$IMAGE_DIR"
+		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/setup.sh || true
+		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/cleanup.sh
+		sudo touch "$IMAGE_DIR"/boot/ssh && sync
+		LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
+		sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
+		sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
+		if [[ ! -f /usr/bin/pishrink.sh ]]; then
+			sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
+		fi
+		sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
+		if [[ $SD_CARD ]]; then
+			sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
+		fi
+		IMG_ZIP_FILE=otbr."$(date +%Y%m%d)".img.zip
+		zip "$IMG_ZIP_FILE" "$STAGE_DIR/otbr.img"
+		mv "$IMG_ZIP_FILE" "$OUTPUT_DIR"
+		sudo umount -lf "${LOOP_NAME}p1"
+		sudo umount -lf "${LOOP_NAME}p2"
+		sudo losetup -d "${LOOP_NAME}"
+	)
 }
 
 main "$@"

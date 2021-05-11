@@ -28,20 +28,20 @@ set -x
 
 # Check inputs
 if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 IMAGE MOUNT"
-  echo "IMAGE - raspberry pi .img file"
-  echo "MOUNT - mount location in the file system"
-  exit
+	echo "Usage: $0 IMAGE MOUNT"
+	echo "IMAGE - raspberry pi .img file"
+	echo "MOUNT - mount location in the file system"
+	exit
 fi
 
-if [ ! -f $1 ]; then
-  echo "Image file $1 does not exist"
-  exit 1
+if [ ! -f "$1" ]; then
+	echo "Image file $1 does not exist"
+	exit 1
 fi
 
-if [ ! -d $2 ]; then
-  echo "Mount point $2 does not exist"
-  exit 2
+if [ ! -d "$2" ]; then
+	echo "Mount point $2 does not exist"
+	exit 2
 fi
 
 echo "Attempting to mount $1 to $2"
@@ -53,16 +53,12 @@ LOOP_BASE=$(losetup -f -P --show $1)
 
 echo "Attached base loopback at: $LOOP_BASE"
 
-# Fetch and parse partition info
-P1_INFO=($`fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p1`)
-P2_INFO=($`fdisk -l $LOOP_BASE | grep ${LOOP_BASE}p2`)
-
 P1_NAME=${LOOP_BASE}p1
 P2_NAME=${LOOP_BASE}p2
 
 # Mount image with the offsets determined above
-mkdir -p $2
-mount $P2_NAME -o rw /media/rpi
-mount $P1_NAME -o rw /media/rpi/boot
+mkdir -p "$2"
+mount "$P2_NAME" -o rw /media/rpi
+mount "$P1_NAME" -o rw /media/rpi/boot
 
 echo "Mounted to $2 and $2/boot"

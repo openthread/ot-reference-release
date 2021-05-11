@@ -34,7 +34,6 @@ cd ot-commissioner
 
 # TODO: checkout to a specific tag/branch
 
-
 wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
 sudo python2 get-pip.py
 
@@ -49,6 +48,3 @@ ninja -j4
 ninja install
 
 sudo systemctl enable commissionerd
-
-
-
