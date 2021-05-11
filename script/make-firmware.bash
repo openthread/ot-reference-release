@@ -58,7 +58,7 @@ cd ot-nrf528xx
 
 NRFUTIL=/tmp/nrfutil-linux
 if [ ! -f $NRFUTIL ]; then
-	wget https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux -o $NRFUTIL
+	wget -O $NRFUTIL https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux
 	chmod +x $NRFUTIL
 fi
 
