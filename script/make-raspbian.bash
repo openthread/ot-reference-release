@@ -87,7 +87,6 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-#apt-get install -y --no-install-recommends nodejs npm
 su -c '$BUILD_OPTIONS script/bootstrap' pi
 
 # Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
@@ -142,8 +141,8 @@ EOF
 		sudo ./qemu-setup.sh "$IMAGE_DIR"
 		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/setup.sh || true
 		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/cleanup.sh
-		echo "enable_uart=1" | sudo tee "$IMAGE_DIR"/boot/config.txt
-		echo "dtoverlay=pi3-disable-bt" | sudo tee "$IMAGE_DIR"/boot/config.txt
+		echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+		echo "dtoverlay=pi3-disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
 		sudo touch "$IMAGE_DIR"/boot/ssh && sync
 		LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
 		sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
