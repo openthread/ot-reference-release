@@ -36,6 +36,7 @@ echo "IN_CHINA=$IN_CHINA"
 echo "OUTPUT_DIR=${OUTPUT_DIR?}"
 
 BUILD_TARGET=raspbian-gcc
+BUILD_OPTIONS='RELEASE=1 '
 BUILD_OPTIONS='REFERENCE_DEVICE=1 '
 BUILD_OPTIONS+='BACKBONE_ROUTER=1 '
 BUILD_OPTIONS+='BORDER_ROUTING=0 '
@@ -44,8 +45,8 @@ BUILD_OPTIONS+='NAT64=0 '
 BUILD_OPTIONS+='DNS64=0 '
 BUILD_OPTIONS+='DHCPV6_PD=0 '
 BUILD_OPTIONS+='WEB_GUI=0 '
-BUILD_OPTIONS+='REST=0 '
-BUILD_OPTIONS+='OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON" '
+BUILD_OPTIONS+='REST_API=0 '
+BUILD_OPTIONS+='OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON --DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF" '
 
 TOOLS_HOME=$HOME/.cache/tools
 
@@ -86,8 +87,8 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-apt-get install -y --no-install-recommends nodejs npm
-su -c 'RELEASE=1 $BUILD_OPTIONS script/bootstrap' pi
+#apt-get install -y --no-install-recommends nodejs npm
+su -c '$BUILD_OPTIONS script/bootstrap' pi
 
 # Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
 # For more background, see https://gitlab.kitware.com/cmake/cmake/-/issues/20568.
@@ -96,7 +97,7 @@ pip3 install scikit-build
 pip3 install cmake==3.10.3
 cmake --version
 
-su -c 'RELEASE=1 $BUILD_OPTIONS script/setup' pi || true
+su -c '$BUILD_OPTIONS script/setup' pi || true
 
 cd /home/pi/repo/
 ./script/make-commissioner.bash
@@ -141,6 +142,8 @@ EOF
 		sudo ./qemu-setup.sh "$IMAGE_DIR"
 		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/setup.sh || true
 		sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/cleanup.sh
+		echo "enable_uart=1" | sudo tee "$IMAGE_DIR"/boot/config.txt
+		echo "dtoverlay=pi3-disable-bt" | sudo tee "$IMAGE_DIR"/boot/config.txt
 		sudo touch "$IMAGE_DIR"/boot/ssh && sync
 		LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
 		sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
