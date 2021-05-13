@@ -29,54 +29,21 @@
 
 set -euxo pipefail
 
-echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
+readonly OTBR_BUILD_DEPS='apt-utils build-essential psmisc ninja-build cmake wget ca-certificates
+  libreadline-dev libncurses-dev libdbus-1-dev libavahi-common-dev
+  libavahi-client-dev libboost-dev libboost-filesystem-dev libboost-system-dev libjsoncpp-dev
+  libnetfilter-queue-dev'
+readonly OTBR_DOCKER_DEPS='git ca-certificates'
 
-readonly PLATFORM=nrf52840
+cd /home/pi/repo/ot-br-posix
+mv ./script /tmp
+mv ./etc /tmp
+find . -delete
+rm -rf /usr/include
+mv /tmp/script .
+mv /tmp/etc .
+#apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_DOCKER_DEPS || true
+#apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_BUILD_DEPS || true
+rm -rf /var/lib/apt/lists/*
 
-readonly BUILD_OPTIONS=('-DOT_BOOTLOADER=USB'
-  '-DOT_REFERENCE_DEVICE=ON'
-  '-DOT_BORDER_ROUTER=ON'
-  '-DOT_SERVICE=ON'
-  '-DOT_COMMISSIONER=ON'
-  '-DOT_JOINER=ON'
-  '-DOT_MAC_FILTER=ON'
-  '-DOT_DUA=ON'
-  '-DOT_MLR=ON'
-  '-DBORDER_AGENT=OFF'
-  '-DOT_COAP=OFF'
-  '-DOT_COAPS=OFF'
-  '-DOT_ECDSA=OFF'
-  '-DOT_FULL_LOGS=OFF'
-  '-DOT_IP6_FRAGM=OFF'
-  '-DOT_LINK_RAW=OFF'
-  '-DOT_MTD_NETDIAG=OFF'
-  '-DOT_SNTP_CLIENT=OFF'
-  '-DOT_UDP_FORWARD=OFF')
-
-cd ot-nrf528xx
-
-NRFUTIL=/tmp/nrfutil-linux
-if [ ! -f $NRFUTIL ]; then
-  wget -O $NRFUTIL https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux
-  chmod +x $NRFUTIL
-fi
-
-OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
-
-$NRFUTIL keys generate private.pem
-
-# $1: The basename of the file to zip, e.g. ot-cli-ftd
-# $2: Thread version number, e.g. 1.2
-make_zip() {
-  arm-none-eabi-objcopy -O ihex ./build-"$2"/bin/"$1" "$1"-"$2".hex
-  $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file private.pem "$1"-"$2".zip
-}
-
-make_zip ot-cli-ftd 1.2
-make_zip ot-rcp 1.2
-
-OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
-make_zip ot-cli-ftd 1.1
-
-mkdir -p "$OUTPUT_ROOT"
-mv ./*.zip "$OUTPUT_ROOT"
+sync

@@ -27,17 +27,18 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-set -e
-set -x
+set -euxo pipefail
 
-OUTPUT_ROOT=$(realpath build)
+mkdir -p build
+
+OUTPUT_ROOT=$(realpath build/ot-"$(date +%Y%m%d)")
 
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
 mkdir -p "$OUTPUT_ROOT"/thci
 
-OUTPUT_DIR="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
-OUTPUT_DIR="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
-OUTPUT_DIR="$OUTPUT_ROOT" ./script/make-raspbian.bash
+OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
+OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
-cp -r doc/* build/
-cp CHANGELOG.txt build/
+cp -r doc/* "$OUTPUT_ROOT"
+cp CHANGELOG.txt "$OUTPUT_ROOT"

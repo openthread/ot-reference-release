@@ -27,8 +27,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-set -e
-set -x
+set -euxo pipefail
 
 cd ot-commissioner
 
@@ -44,7 +43,7 @@ mkdir -p build
 cd build
 
 /usr/local/bin/cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DOT_COMM_REFERENCE_DEVICE=ON ..
-ninja -j4
+ninja -j10
 ninja install
 
 sudo systemctl enable commissionerd

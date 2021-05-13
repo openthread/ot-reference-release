@@ -29,54 +29,51 @@
 
 set -euxo pipefail
 
-echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
+export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
+export PATH=$PATH:/usr/local/bin
 
-readonly PLATFORM=nrf52840
+IN_CHINA=$1
 
-readonly BUILD_OPTIONS=('-DOT_BOOTLOADER=USB'
-  '-DOT_REFERENCE_DEVICE=ON'
-  '-DOT_BORDER_ROUTER=ON'
-  '-DOT_SERVICE=ON'
-  '-DOT_COMMISSIONER=ON'
-  '-DOT_JOINER=ON'
-  '-DOT_MAC_FILTER=ON'
-  '-DOT_DUA=ON'
-  '-DOT_MLR=ON'
-  '-DBORDER_AGENT=OFF'
-  '-DOT_COAP=OFF'
-  '-DOT_COAPS=OFF'
-  '-DOT_ECDSA=OFF'
-  '-DOT_FULL_LOGS=OFF'
-  '-DOT_IP6_FRAGM=OFF'
-  '-DOT_LINK_RAW=OFF'
-  '-DOT_MTD_NETDIAG=OFF'
-  '-DOT_SNTP_CLIENT=OFF'
-  '-DOT_UDP_FORWARD=OFF')
+readonly BUILD_OPTIONS=('RELEASE=1'
+  'REFERENCE_DEVICE=1'
+  'BACKBONE_ROUTER=1'
+  'BORDER_ROUTING=0'
+  'NETWORK_MANAGER=0'
+  'NAT64=0'
+  'DNS64=0'
+  'DHCPV6_PD=0'
+  'WEB_GUI=0'
+  'REST_API=0'
+  'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
+)
 
-cd ot-nrf528xx
-
-NRFUTIL=/tmp/nrfutil-linux
-if [ ! -f $NRFUTIL ]; then
-  wget -O $NRFUTIL https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1/nrfutil-linux
-  chmod +x $NRFUTIL
-fi
-
-OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
-
-$NRFUTIL keys generate private.pem
-
-# $1: The basename of the file to zip, e.g. ot-cli-ftd
-# $2: Thread version number, e.g. 1.2
-make_zip() {
-  arm-none-eabi-objcopy -O ihex ./build-"$2"/bin/"$1" "$1"-"$2".hex
-  $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file private.pem "$1"-"$2".zip
+configure_apt_source() {
+  if [ "$IN_CHINA" = 1 ]; then
+    echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi
+deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi' | sudo tee /etc/apt/sources.list
+    echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
+  fi
 }
+configure_apt_source
 
-make_zip ot-cli-ftd 1.2
-make_zip ot-rcp 1.2
+echo "127.0.0.1 $(hostname)" >> /etc/hosts
+chown -R pi:pi /home/pi/repo
+cd /home/pi/repo/ot-br-posix
+apt-get update
+apt-get install -y --no-install-recommends git python3-pip
+su -c "${BUILD_OPTIONS[*]} script/bootstrap" pi
 
-OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
-make_zip ot-cli-ftd 1.1
+# Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
+# For more background, see https://gitlab.kitware.com/cmake/cmake/-/issues/20568.
+apt-get purge -y cmake
+pip3 install scikit-build
+pip3 install cmake==3.10.3
+cmake --version
 
-mkdir -p "$OUTPUT_ROOT"
-mv ./*.zip "$OUTPUT_ROOT"
+su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
+
+cd /home/pi/repo/
+./script/make-commissioner.bash
+
+sync

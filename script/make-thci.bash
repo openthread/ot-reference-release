@@ -27,23 +27,22 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-set -e
-set -x
+set -euxo pipefail
 
-echo "OUTPUT_DIR=${OUTPUT_DIR?}"
+echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
-mkdir -p "$OUTPUT_DIR"/ot-comm
+mkdir -p "$OUTPUT_ROOT"/ot-comm
 
 (
-	cd ot-br-posix/third_party/openthread/repo/tools/harness-thci
-	cp OpenThread_BR.py "$OUTPUT_DIR"
-	cp OpenThread.py "$OUTPUT_DIR"
+  cd ot-br-posix/third_party/openthread/repo/tools/harness-thci
+  cp OpenThread_BR.py "$OUTPUT_ROOT"
+  cp OpenThread.py "$OUTPUT_ROOT"
 )
 
 (
-	cd ot-commissioner/tools/commissioner_thci
-	cp commissioner.py "$OUTPUT_DIR"/ot-comm
-	cp commissioner_impl.py "$OUTPUT_DIR"/ot-comm
+  cd ot-commissioner/tools/commissioner_thci
+  cp commissioner.py "$OUTPUT_ROOT"/ot-comm
+  cp commissioner_impl.py "$OUTPUT_ROOT"/ot-comm
 )
 
 sync

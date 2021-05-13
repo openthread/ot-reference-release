@@ -24,7 +24,7 @@
 # Script to mount a provided raspbian image to a provided location
 #
 
-set -x
+set -euxo pipefail
 
 # Check inputs
 if [ "$#" -ne 2 ]; then
