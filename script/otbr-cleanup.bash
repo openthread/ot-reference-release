@@ -32,7 +32,7 @@ set -euxo pipefail
 readonly OTBR_BUILD_DEPS='apt-utils build-essential ninja-build cmake wget ca-certificates
   libreadline-dev libncurses-dev libdbus-1-dev libavahi-common-dev
   libavahi-client-dev libboost-dev libboost-filesystem-dev libboost-system-dev libjsoncpp-dev
-  libnetfilter-queue-dev'
+  libnetfilter-queue-dev npm nodejs'
 readonly OTBR_DOCKER_DEPS='git ca-certificates'
 
 cd /home/pi/repo/ot-br-posix

@@ -61,8 +61,6 @@ if [ ! -f $NRFUTIL ]; then
   chmod +x $NRFUTIL
 fi
 
-OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
-
 $NRFUTIL keys generate private.pem
 
 # $1: The basename of the file to zip, e.g. ot-cli-ftd
@@ -72,11 +70,17 @@ make_zip() {
   $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file private.pem "$1"-"$2".zip
 }
 
-make_zip ot-cli-ftd 1.2
-make_zip ot-rcp 1.2
+if [ "${THREAD_VERSION?}" = "1.2" ]; then
+  OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
+  make_zip ot-cli-ftd 1.2
+  make_zip ot-rcp 1.2
 
-OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
-make_zip ot-cli-ftd 1.1
+  OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
+  make_zip ot-cli-ftd 1.1
+elif [ "${THREAD_VERSION}" = "duckhorn" ]; then
+  OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2
+  make_zip ot-rcp 1.2
+fi
 
 mkdir -p "$OUTPUT_ROOT"
 mv ./*.zip "$OUTPUT_ROOT"

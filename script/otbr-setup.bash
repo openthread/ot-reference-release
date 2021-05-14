@@ -33,20 +33,29 @@ export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
 export PATH=$PATH:/usr/local/bin
 
-IN_CHINA=$1
+THREAD_VERSION=$1
+IN_CHINA=$2
 
-readonly BUILD_OPTIONS=('RELEASE=1'
-  'REFERENCE_DEVICE=1'
-  'BACKBONE_ROUTER=1'
-  'BORDER_ROUTING=0'
-  'NETWORK_MANAGER=0'
-  'NAT64=0'
-  'DNS64=0'
-  'DHCPV6_PD=0'
-  'WEB_GUI=0'
-  'REST_API=0'
-  'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
-)
+if [ "${THREAD_VERSION?}" = "1.2" ]; then
+  readonly BUILD_OPTIONS=(
+    'RELEASE=1'
+    'REFERENCE_DEVICE=1'
+    'BACKBONE_ROUTER=1'
+    'BORDER_ROUTING=0'
+    'NETWORK_MANAGER=0'
+    'NAT64=0'
+    'DNS64=0'
+    'DHCPV6_PD=0'
+    'WEB_GUI=0'
+    'REST_API=0'
+    'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
+  )
+elif [ "${THREAD_VERSION?}" = "duckhorn" ]; then
+  readonly BUILD_OPTIONS=(
+    'RELEASE=1'
+    'REFERENCE_DEVICE=1'
+  )
+fi
 
 configure_apt_source() {
   if [ "$IN_CHINA" = 1 ]; then
@@ -57,7 +66,7 @@ deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-f
 }
 configure_apt_source
 
-echo "127.0.0.1 $(hostname)" >> /etc/hosts
+echo "127.0.0.1 $(hostname)" >>/etc/hosts
 chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
@@ -73,7 +82,9 @@ cmake --version
 
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
-cd /home/pi/repo/
-./script/make-commissioner.bash
+if [ "$THREAD_VERSION" = "1.2" ]; then
+  cd /home/pi/repo/
+  ./script/make-commissioner.bash
+fi
 
 sync

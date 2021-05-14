@@ -30,9 +30,14 @@
 set -euxo pipefail
 
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
-echo "IMAGE_URL=${IMAGE_URL?}"
+echo "THREAD_VERSION=${THREAD_VERSION?}"
 echo "IN_CHINA=$IN_CHINA"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
+
+if [ "$THREAD_VERSION" != "1.2" ] && [ "$THREAD_VERSION" != "duckhorn" ]; then
+  echo "Invalid Thread version: $THREAD_VERSION"
+  exit 1
+fi
 
 BUILD_TARGET=raspbian-gcc
 
@@ -60,7 +65,7 @@ main() {
     sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
     sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
     sudo ./qemu-setup.sh "$IMAGE_DIR"
-    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "$IN_CHINA"
+    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${THREAD_VERSION?}" "$IN_CHINA"
     sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
     echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
     echo "dtoverlay=pi3-disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt

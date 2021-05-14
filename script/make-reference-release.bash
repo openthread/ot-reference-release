@@ -31,13 +31,19 @@ set -euxo pipefail
 
 mkdir -p build
 
-OUTPUT_ROOT=$(realpath build/ot-"$(date +%Y%m%d)")
+echo "THREAD_VERSION=${THREAD_VERSION?}"
+
+OUTPUT_ROOT=$(realpath build/ot-"$(date +%Y%m%d)-${THREAD_VERSION?}")
 
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
-mkdir -p "$OUTPUT_ROOT"/thci
-
 OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
-OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+
+if [ "${THREAD_VERSION?}" = "1.2" ]; then
+  mkdir -p "$OUTPUT_ROOT"/thci
+  OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+fi
+
+mkdir -p "$OUTPUT_ROOT"
 OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
 cp -r doc/* "$OUTPUT_ROOT"
