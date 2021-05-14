@@ -29,7 +29,7 @@
 
 set -euxo pipefail
 
-readonly OTBR_BUILD_DEPS='apt-utils build-essential psmisc ninja-build cmake wget ca-certificates
+readonly OTBR_BUILD_DEPS='apt-utils build-essential ninja-build cmake wget ca-certificates
   libreadline-dev libncurses-dev libdbus-1-dev libavahi-common-dev
   libavahi-client-dev libboost-dev libboost-filesystem-dev libboost-system-dev libjsoncpp-dev
   libnetfilter-queue-dev'
@@ -42,8 +42,8 @@ find . -delete
 rm -rf /usr/include
 mv /tmp/script .
 mv /tmp/etc .
-#apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_DOCKER_DEPS || true
-#apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_BUILD_DEPS || true
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_DOCKER_DEPS || true
+apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_BUILD_DEPS || true
 rm -rf /var/lib/apt/lists/*
 
 sync

@@ -39,7 +39,7 @@ BUILD_TARGET=raspbian-gcc
 TOOLS_HOME=$HOME/.cache/tools
 
 main() {
-  BUILD_TARGET=$BUILD_TARGET IMAGE_URL=$IMAGE_URL sh ot-br-posix/tests/scripts/bootstrap.sh
+  BUILD_TARGET=$BUILD_TARGET IMAGE_URL=$IMAGE_URL ./script/bootstrap.bash
 
   IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
   STAGE_DIR=/tmp/raspbian
