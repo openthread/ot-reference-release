@@ -38,6 +38,7 @@ IN_CHINA=$2
 
 if [ "${THREAD_VERSION?}" = "1.2" ]; then
   readonly BUILD_OPTIONS=(
+    'INFRA_IF_NAME=eth0'
     'RELEASE=1'
     'REFERENCE_DEVICE=1'
     'BACKBONE_ROUTER=1'

@@ -32,8 +32,13 @@ set -euxo pipefail
 mkdir -p build
 
 echo "THREAD_VERSION=${THREAD_VERSION?}"
+echo "OT_COMMIT"=${OT_COMMIT?}
 
 OUTPUT_ROOT=$(realpath build/ot-"$(date +%Y%m%d)-${THREAD_VERSION?}")
+
+(cd ot-nrf528xx/openthread && git fetch --all && git checkout $OT_COMMIT)
+(cd ot-br-posix/third_party/openthread/repo && git fetch --all && git checkout $OT_COMMIT)
+(cd ot-commissioner && git fetch --all && git checkout cert)
 
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
 OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
