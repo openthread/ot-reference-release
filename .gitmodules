@@ -7,3 +7,9 @@
 [submodule "ot-commissioner"]
 	path = ot-commissioner
 	url = https://github.com/openthread/ot-commissioner
+[submodule "openthread"]
+	path = openthread
+	url = https://github.com/openthread/openthread
+[submodule "docker-rpi-emu"]
+	path = docker-rpi-emu
+	url = https://github.com/ryankurte/docker-rpi-emu.git
