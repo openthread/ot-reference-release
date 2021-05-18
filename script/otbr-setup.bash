@@ -33,10 +33,10 @@ export LC_ALL=C
 export DEBIAN_FRONTEND=noninteractive
 export PATH=$PATH:/usr/local/bin
 
-THREAD_VERSION=$1
+REFERENCE_RELEASE_TYPE=$1
 IN_CHINA=$2
 
-if [ "${THREAD_VERSION?}" = "1.2" ]; then
+if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
   readonly BUILD_OPTIONS=(
     'INFRA_IF_NAME=eth0'
     'RELEASE=1'
@@ -51,7 +51,7 @@ if [ "${THREAD_VERSION?}" = "1.2" ]; then
     'REST_API=0'
     'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
   )
-elif [ "${THREAD_VERSION?}" = "duckhorn" ]; then
+elif [ "${REFERENCE_RELEASE_TYPE?}" = "duckhorn" ]; then
   readonly BUILD_OPTIONS=(
     'RELEASE=1'
     'REFERENCE_DEVICE=1'
@@ -74,6 +74,9 @@ apt-get update
 apt-get install -y --no-install-recommends git python3-pip
 su -c "${BUILD_OPTIONS[*]} script/bootstrap" pi
 
+rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo/*
+cp -r /home/pi/repo/openthread/* /home/pi/repo/ot-br-posix/third_party/openthread/repo/
+
 # Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
 # For more background, see https://gitlab.kitware.com/cmake/cmake/-/issues/20568.
 apt-get purge -y cmake
@@ -83,7 +86,7 @@ cmake --version
 
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
-if [ "$THREAD_VERSION" = "1.2" ]; then
+if [ "$REFERENCE_RELEASE_TYPE" = "certification" ]; then
   cd /home/pi/repo/
   ./script/make-commissioner.bash
 fi

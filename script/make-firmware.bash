@@ -40,8 +40,12 @@ readonly BUILD_OPTIONS=('-DOT_BOOTLOADER=USB'
   '-DOT_COMMISSIONER=ON'
   '-DOT_JOINER=ON'
   '-DOT_MAC_FILTER=ON'
+  '-DDHCP6_SERVER=ON'
+  '-DDHCP6_CLIENT=ON'
   '-DOT_DUA=ON'
   '-DOT_MLR=ON'
+  '-DOT_CSL_RECEIVER=ON'
+  '-DOT_LINK_METRICS=ON'
   '-DBORDER_AGENT=OFF'
   '-DOT_COAP=OFF'
   '-DOT_COAPS=OFF'
@@ -70,17 +74,24 @@ make_zip() {
   $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file private.pem "$1"-"$2".zip
 }
 
-if [ "${THREAD_VERSION?}" = "1.2" ]; then
+rm -rf openthread/*
+cp -r ../openthread/* openthread/
+
+if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
   OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
   make_zip ot-cli-ftd 1.2
   make_zip ot-rcp 1.2
 
   OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
   make_zip ot-cli-ftd 1.1
-elif [ "${THREAD_VERSION}" = "duckhorn" ]; then
+elif [ "${REFERENCE_RELEASE_TYPE}" = "duckhorn" ]; then
   OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2
   make_zip ot-rcp 1.2
 fi
 
 mkdir -p "$OUTPUT_ROOT"
 mv ./*.zip "$OUTPUT_ROOT"
+
+rm -rf openthread
+git clean -xfd
+git submodule update --force

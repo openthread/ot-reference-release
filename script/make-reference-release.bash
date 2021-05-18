@@ -31,19 +31,16 @@ set -euxo pipefail
 
 mkdir -p build
 
-echo "THREAD_VERSION=${THREAD_VERSION?}"
-echo "OT_COMMIT"=${OT_COMMIT?}
+echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 
-OUTPUT_ROOT=$(realpath build/ot-"$(date +%Y%m%d)-${THREAD_VERSION?}")
+OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(git rev-parse --short HEAD)")
 
-(cd ot-nrf528xx/openthread && git fetch --all && git checkout $OT_COMMIT)
-(cd ot-br-posix/third_party/openthread/repo && git fetch --all && git checkout $OT_COMMIT)
 (cd ot-commissioner && git fetch --all && git checkout cert)
 
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
 OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
 
-if [ "${THREAD_VERSION?}" = "1.2" ]; then
+if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
   mkdir -p "$OUTPUT_ROOT"/thci
   OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
 fi
@@ -52,4 +49,5 @@ mkdir -p "$OUTPUT_ROOT"
 OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
 cp -r doc/* "$OUTPUT_ROOT"
+cp -r burn_tool_dongle "$OUTPUT_ROOT"
 cp CHANGELOG.txt "$OUTPUT_ROOT"

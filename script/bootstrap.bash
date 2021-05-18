@@ -50,7 +50,6 @@ install_common_dependencies() {
   sudo apt-get install --no-install-recommends -y \
     libdbus-1-dev \
     ninja-build \
-    doxygen \
     expect \
     net-tools \
     libboost-dev \
@@ -95,13 +94,7 @@ if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
 fi
 
 # Prepare Raspbian image
-sudo apt-get install --no-install-recommends --allow-unauthenticated -y qemu qemu-user-static binfmt-support parted
-
-(mkdir -p docker-rpi-emu &&
-  cd docker-rpi-emu &&
-  (git --git-dir=.git rev-parse --is-inside-work-tree || git --git-dir=.git init .) &&
-  git fetch --depth 1 https://github.com/ryankurte/docker-rpi-emu.git master &&
-  git checkout FETCH_HEAD)
+sudo apt-get install --no-install-recommends --allow-unauthenticated -y qemu qemu-user-static binfmt-support parted dcfldd
 
 pip3 install git-archive-all
 

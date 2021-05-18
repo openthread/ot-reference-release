@@ -30,12 +30,12 @@
 set -euxo pipefail
 
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
-echo "THREAD_VERSION=${THREAD_VERSION?}"
+echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=$IN_CHINA"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
-if [ "$THREAD_VERSION" != "1.2" ] && [ "$THREAD_VERSION" != "duckhorn" ]; then
-  echo "Invalid Thread version: $THREAD_VERSION"
+if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "duckhorn" ]; then
+  echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
   exit 1
 fi
 
@@ -65,7 +65,7 @@ main() {
     sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
     sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
     sudo ./qemu-setup.sh "$IMAGE_DIR"
-    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${THREAD_VERSION?}" "$IN_CHINA"
+    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA"
     sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
     echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
     echo "dtoverlay=pi3-disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
@@ -77,12 +77,11 @@ main() {
       sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
     fi
     sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
-    if [[ $SD_CARD ]]; then
+    if [[ -n ${SD_CARD:=} ]]; then
       sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
     fi
     IMG_ZIP_FILE=otbr."$(date +%Y%m%d)".img.zip
-    zip "$IMG_ZIP_FILE" "$STAGE_DIR/otbr.img"
-    mv "$IMG_ZIP_FILE" "$OUTPUT_ROOT"
+    (cd $STAGE_DIR && zip "$IMG_ZIP_FILE" otbr.img && mv "$IMG_ZIP_FILE" "$OUTPUT_ROOT")
     sudo umount -lf "${LOOP_NAME}p1"
     sudo umount -lf "${LOOP_NAME}p2"
     sudo losetup -d "${LOOP_NAME}"
