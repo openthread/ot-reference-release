@@ -33,7 +33,7 @@ echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
 readonly PLATFORM=nrf52840
 
-readonly BUILD_OPTIONS=('-DOT_BOOTLOADER=USB'
+readonly BUILD_1_2_OPTIONS=('-DOT_BOOTLOADER=USB'
   '-DOT_REFERENCE_DEVICE=ON'
   '-DOT_BORDER_ROUTER=ON'
   '-DOT_SERVICE=ON'
@@ -57,7 +57,17 @@ readonly BUILD_OPTIONS=('-DOT_BOOTLOADER=USB'
   '-DOT_SNTP_CLIENT=OFF'
   '-DOT_UDP_FORWARD=OFF')
 
-cd ot-nrf528xx
+readonly BUILD_1_1_ENV=(
+  'BORDER_ROUTER=1'
+  'REFERENCE_DEVICE=1'
+  'COMMISSIONER=1'
+  'DHCP6_CLIENT=1'
+  'DHCP6_SERVER=1'
+  'JOINER=1'
+  'MAC_FILTER=1'
+  'BOOTLOADER=1'
+  'USB=1'
+)
 
 NRFUTIL=/tmp/nrfutil-linux
 if [ ! -f $NRFUTIL ]; then
@@ -65,33 +75,44 @@ if [ ! -f $NRFUTIL ]; then
   chmod +x $NRFUTIL
 fi
 
-$NRFUTIL keys generate private.pem
+$NRFUTIL keys generate /tmp/private.pem
+mkdir -p "$OUTPUT_ROOT"
 
 # $1: The basename of the file to zip, e.g. ot-cli-ftd
 # $2: Thread version number, e.g. 1.2
 make_zip() {
   arm-none-eabi-objcopy -O ihex ./build-"$2"/bin/"$1" "$1"-"$2".hex
-  $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file private.pem "$1"-"$2".zip
+  $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "$1"-"$2".hex --key-file /tmp/private.pem "$1"-"$2".zip
 }
 
-rm -rf openthread/*
-cp -r ../openthread/* openthread/
-
 if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-  OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_OPTIONS[*]}"
-  make_zip ot-cli-ftd 1.2
-  make_zip ot-rcp 1.2
+  (
+    cd ot-nrf528xx
+    git clean -xfd
+    OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_1_2_OPTIONS[@]}"
+    rm -rf openthread/*
+    cp -r ../openthread/* openthread/
+    make_zip ot-cli-ftd 1.2
+    make_zip ot-rcp 1.2
+    mv ./*.zip "$OUTPUT_ROOT"
+    rm -rf openthread
+    git clean -xfd
+    git submodule update --force
+  )
 
-  OT_CMAKE_BUILD_DIR=build-1.1 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.1 "${BUILD_OPTIONS[*]}"
-  make_zip ot-cli-ftd 1.1
+  (
+    cd openthread-1.1
+    git clean -xfd
+    git checkout 54b31928
+    ./bootstrap
+    make -f examples/Makefile-nrf52840 "${BUILD_1_1_ENV[@]}"
+    arm-none-eabi-objcopy -O ihex output/nrf52840/bin/ot-cli-ftd ot-cli-ftd.hex
+    $NRFUTIL pkg generate --debug-mode --hw-version 52 --sd-req 0 --application ot-cli-ftd.hex --key-file /tmp/private.pem ot-cli-ftd-1.1.hex.zip
+    mv ./*.zip "$OUTPUT_ROOT"
+  )
 elif [ "${REFERENCE_RELEASE_TYPE}" = "duckhorn" ]; then
   OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2
   make_zip ot-rcp 1.2
 fi
 
-mkdir -p "$OUTPUT_ROOT"
-mv ./*.zip "$OUTPUT_ROOT"
-
-rm -rf openthread
-git clean -xfd
-git submodule update --force
+rm /tmp/private.pem

@@ -54,6 +54,7 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "duckhorn" ]; then
   readonly BUILD_OPTIONS=(
     'RELEASE=1'
+    'NETWORK_MANAGER=0'
     'REFERENCE_DEVICE=1'
   )
 fi
