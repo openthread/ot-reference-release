@@ -13,3 +13,6 @@
 [submodule "docker-rpi-emu"]
 	path = docker-rpi-emu
 	url = https://github.com/ryankurte/docker-rpi-emu.git
+[submodule "openthread-1.1"]
+	path = openthread-1.1
+	url = https://github.com/openthread/openthread.git
