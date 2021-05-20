@@ -93,11 +93,15 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
   (
     cd ot-nrf528xx
     git clean -xfd
+    COMMIT_ID=$(cd ../openthread && git rev-parse --short HEAD)
+    DATE=$(date +%Y%m%d)
     rm -rf openthread/*
     cp -r ../openthread/* openthread/
     OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_1_2_OPTIONS[@]}"
     make_zip ot-cli-ftd 1.2
     make_zip ot-rcp 1.2
+    mv ot-cli-ftd-1.2.zip ot-cli-ftd-$DATE-$COMMIT_ID-1.2.zip
+    mv ot-rcp-1.2.zip ot-rcp-$DATE-$COMMIT_ID-1.2.zip
     mv ./*.zip "$OUTPUT_ROOT"
     rm -rf openthread
     git clean -xfd
@@ -106,10 +110,13 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
 
   (
     cd openthread-1.1
+    COMMIT_ID=$(git rev-parse --short HEAD)
+    DATE=$(date +%Y%m%d)
     git clean -xfd
     ./bootstrap
     make -f examples/Makefile-nrf52840 "${BUILD_1_1_ENV[@]}"
     make_zip ot-cli-ftd 1.1 output/nrf52840/bin/ot-cli-ftd
+    mv ot-cli-ftd-1.1.zip ot-cli-ftd-$DATE-$COMMIT_ID-1.1.zip
     mv ./*.zip "$OUTPUT_ROOT"
     git clean -xfd
   )
