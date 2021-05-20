@@ -49,5 +49,4 @@ mkdir -p "$OUTPUT_ROOT"
 OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
 cp -r doc/* "$OUTPUT_ROOT"
-cp -r burn_tool_dongle "$OUTPUT_ROOT"
 cp CHANGELOG.txt "$OUTPUT_ROOT"

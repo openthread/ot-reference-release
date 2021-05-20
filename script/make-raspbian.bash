@@ -34,7 +34,7 @@ echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=$IN_CHINA"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
-if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "duckhorn" ]; then
+if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
   echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
   exit 1
 fi
