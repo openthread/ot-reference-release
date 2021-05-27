@@ -39,14 +39,14 @@ OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd
 
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
 OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
-#
-#if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-#  mkdir -p "$OUTPUT_ROOT"/thci
-#  OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
-#fi
-#
-#mkdir -p "$OUTPUT_ROOT"
-#OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
+
+if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
+  mkdir -p "$OUTPUT_ROOT"/thci
+  OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+fi
+
+mkdir -p "$OUTPUT_ROOT"
+OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
 cp -r doc/* "$OUTPUT_ROOT"
 cp CHANGELOG.txt "$OUTPUT_ROOT"

@@ -22,13 +22,18 @@ China so that you can save time while installing software dependencies.
 For example, if you are in China and want to flash the built image to an SD card:
 
 ```
-$ REFERENCE_RELEASE_TYPE=1.2 IN_CHINA=1 SD_CARD=/dev/sda ./script/make-reference-release.bash 
+$ REFERENCE_RELEASE_TYPE=certification IN_CHINA=1 SD_CARD=/dev/sda ./script/make-reference-release.bash 
 ```
 
-The built reference release typically contains following components:
-- Raspberry Pi image containing OTBR service
+When `REFERENCE_RELEASE_TYPE` is `certification`, reference release contains following components:
+- Raspberry Pi image containing OTBR service and OT Commissioner
 - Firmware
 - THCI
 - Change log
 - Quick start guide
 
+When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following components:
+- Raspberry Pi image containing OTBR service with border routing feature and service registry feature
+- Firmware
+- Change log
+- Quick start guide
