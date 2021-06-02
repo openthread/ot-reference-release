@@ -75,8 +75,8 @@ apt-get update
 apt-get install -y --no-install-recommends git python3-pip
 su -c "${BUILD_OPTIONS[*]} script/bootstrap" pi
 
-rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo/*
-cp -r /home/pi/repo/openthread/* /home/pi/repo/ot-br-posix/third_party/openthread/repo/
+rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
+cp -r /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
 
 # Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
 # For more background, see https://gitlab.kitware.com/cmake/cmake/-/issues/20568.
