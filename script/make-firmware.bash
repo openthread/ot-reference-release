@@ -95,8 +95,8 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
     git clean -xfd
     COMMIT_ID=$(cd ../openthread && git rev-parse --short HEAD)
     DATE=$(date +%Y%m%d)
-    rm -rf openthread/*
-    cp -r ../openthread/* openthread/
+    rm -rf openthread
+    cp -r ../openthread .
     OT_CMAKE_BUILD_DIR=build-1.2 ./script/build $PLATFORM USB_trans -DOT_THREAD_VERSION=1.2 "${BUILD_1_2_OPTIONS[@]}"
     make_zip ot-cli-ftd 1.2
     make_zip ot-rcp 1.2
