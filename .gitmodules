@@ -7,6 +7,7 @@
 [submodule "ot-commissioner"]
 	path = ot-commissioner
 	url = https://github.com/openthread/ot-commissioner
+	branch = cert
 [submodule "openthread"]
 	path = openthread
 	url = https://github.com/openthread/openthread

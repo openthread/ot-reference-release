@@ -35,8 +35,6 @@ echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 
 OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)")
 
-(cd ot-commissioner && git fetch --all && git checkout cert)
-
 mkdir -p "$OUTPUT_ROOT"/fw_dongle/
 OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
 
