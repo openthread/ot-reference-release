@@ -3,6 +3,18 @@
 
 ## Usage
 
+Clone this repository:
+
+```
+$ git clone https://github.com/openthread/ot-reference-release
+```
+
+Initialize the submodules:
+
+```
+$ git submodule update --init --recursive
+```
+
 At the root of the repository:
 
 ```
