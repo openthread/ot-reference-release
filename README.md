@@ -49,3 +49,5 @@ When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following com
 - Firmware
 - Change log
 - Quick start guide
+
+Note: Currently, only nRF52840 dongles are supported for CLI/RCP firmwares.
