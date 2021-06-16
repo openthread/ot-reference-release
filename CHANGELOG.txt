@@ -1,8 +1,8 @@
 NOTES:
 
     * Refer to OpenThread 1.2 Reference Release QSG.pdf for setup guide.
-    * THCI works with TestHarness 1.2, but all TCs are not passed.
-    * OTBR1.2 Host is missing mdns_query and mldv2_query APIs. Recommend to use Host devices of other vendors.
+    * Verified that THCI works with Thread 1.2 Test Harness 1.2, without assurance to pass certification regression tests.
+    * Two APIs (`mdns_query()` and `mldv2_query()`) are missing for Host Role. Recommend using Host Device from the other vendors during certification.
 
 FEATURES
 
