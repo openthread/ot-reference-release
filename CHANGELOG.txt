@@ -23,7 +23,7 @@ CHANGELOG
         * Use latest openthread/ot-br-posix main branch
 
     * THCI update - OpenThread.py (TD)
-        * Support both TestHarness 1.2 and TestHarness 1.1
+        * Support both Thread Dev Harness V1.2 and Thread Dev Harness V1.1
 
     * THCI update - OpenThread_BR.py (BBR)
         * Support TestHarness Discovery and SSH connection
