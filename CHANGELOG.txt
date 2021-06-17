@@ -1,16 +1,8 @@
-ACTIONS:
-=======
-1) Use either of two options below to update OTBR
-    1) Raspbian image
-        a) install Raspbian image otbr12.20200615.img.zip
-    2) Intall otbr_host_pkg binaries
-        a) copy the otbr_host_pkg/ to pi following the guide in previous release
-        b) on pi, under directory otbr_host_pkg/, run
-            `sudo ./install.sh`
+NOTES:
 
-2) Flash ncp and cli firmware according to your hardware
-3) Update THCI (refer to OpenThread 1.2 Reference Release QSG.pdf for adding OT-Commissioner support)
-
+    * Refer to OpenThread 1.2 Reference Release QSG.pdf for setup guide.
+    * Verified that THCI works with Thread 1.2 Test Harness 1.2, without assurance to pass certification regression tests.
+    * Two APIs (`mdns_query()` and `mldv2_query()`) are missing for Host Role. Recommend using Host Device from the other vendors during certification.
 
 FEATURES
 
@@ -19,167 +11,23 @@ FEATURES
     * Domain Unicast Address
     * OT-Commissioner, Host
 
-KNOWN ISSUES
-
-    * 5.11.3  BBR-TC-03 PBBR/SBBR - Inconclusive - mdns_query() not implemented (to be supported).
-    * nRF52840 USB dongle DFU driver may not be updated properly on some windows (root cause to be identified).
-      <Need manually push the `reset` button to put the dongle enter DFU bootloader for firmware update>
-
 CHANGELOG
 ==========
 
-* 06/15/2020 (commitid:ga486ed51, fork/RC8)
+* 06/15/2021 (commitid:4b36e5115, main)
 
     * OpenThread Firmware Update
-        * Fix CSL bug when resetting devices (fixes 7.1.1)
-        * Fix ADDR_NTF.ans to Children to use Children's ML-IID
-        * Forward any packet with on-mesh destination #5024
-        * Fix PBBR to forward packet to MTD child
-        * Resolves BHC-612
-
-    * THCI update - OpenThread.py (TD)
-        * No update
-
-    * THCI update - OpenThread_Wpanctl.py (BBR)
-        * Improve THCI performance significantly
-        * getGlobal() add parameter: eth=False
-        * configBorderRouter() add parameter: P_dp=0
-    	* Fix THCI setDefaultValues() issue after resetting
+        * Use latest openthread/openthread main branch
 
     * OTBR Update
-        * Change backbone prefix to 910b::/64 on Host
+        * Use latest openthread/ot-br-posix main branch
+
+    * THCI update - OpenThread.py (TD)
+        * Support both Thread Dev Harness V1.2 and Thread Dev Harness V1.1
+
+    * THCI update - OpenThread_BR.py (BBR)
+        * Support TestHarness Discovery and SSH connection
+        * Support BR_1/BR_2/Host/ExtComm capabilities
 
     * OT-Commissioner
-        * Add API to stop external commissioner: stopExternalCommissioner()
-
-
-* 05/07/2020 (commitid:g35d07ad9, fork/RC7)
-
-    * OpenThread Firmware Update
-        * Fix CSL Vender OUI
-        * Fix REED unable to send DUA.reg (5.9.19 REED)
-        * Fix `ADDR_ERROR.ntf` handling issues (5.9.13 SSED)
-        * Fix frame pending for 1.1 device
-        * Handle MLR.rsp successful status (5.10.22 Router)
-        * Use random MA registration periods (5.10.22 FED)
-
-    * THCI update - OpenThread.py (TD)
-        * Enhance OpenThread version recognizing
-
-    * THCI update - OpenThread_Wpanctl.py (BBR)
-        * `setupHost` add `setDua=False` argument (5.9.22 SBBR)
-        * support network name with whitespaces
-
-    * OTBR Update
-        * Fix `ip -6 neigh flush` to clear all neighbors (5.9.9 PBBR)
-        * Fix bug that PBBR does not forward ping requests for MED (5.9.21 PBBR, 5.9.8 PBBR)
-        * Fix BBR dataset issues (5.11.2 PBBR)
-
-    * OT-Commissioner
-        * no update
-
-
-* 03/18/2020 (commitid:gac0c2990, fork/RC6)
-
-    * OpenThread Firmware Update
-        * Enhance config_next_dua_status_rsp to handle 500 error code
-        * Support whitespace in networkname
-        * Fix MED's MA reregistration issue when switch to 1.1 parent
-        * Fix BBR dataset issues regarding multiple servers
-        * Fix MA registration issues for invalid addresses
-        * Fix malformed link metrics management request
-        * Fix bug of sending mac data request
-        * Use Thread OUI for enhanced ack
-        * Increase CLI rx buffer size to 640 for REFERENCE_DEVICE
-
-    * THCI update - OpenThread.py (TD)
-        * Allow networkname to contain whitespaces
-        * Improve node CLI responsiveness
-
-    * THCI update - OpenThread_Wpanctl.py (BBR)
-        * setBbrDataset add SeqNum=None argument to set SeqNum to a given value
-        * Add external commissioner capability
-        * Add deregisterMulticast API
-
-    * OTBR Update
-        * Turn off radvd service on BBR
-
-    * OT-Commissioner
-        * Fix TTY Columns issue
-
-
-* 01/21/2020 (commitid:gd4a6b74a, fork/RC5)
-
-    * OpenThread Firmware Update
-        * Send DUA.ntf for non-success on-behalf reg
-        * MTD prioritizes MlEid registration (SPEC-899)
-        * Prefer RLOC source with RLOC dest
-        * Support configurable BTMF COAP port
-
-    * THCI update - OpenThread.py (TD)
-        * registerDUA() override generated DUA (DEV-2007)
-        * Add registerDUA() workaround for DUA overwrite
-
-    * THCI update - OpenThread_Wpanctl.py (BBR)
-        * Add initial OT-Commissioner support
-        * Fix config_next_dua_status_rsp
-        * Update get_eth_ll() to return the link local address
-        * Fix ip_neigh_add(): add argument nud='noarp'
-        * Fix DUA-TC-11 direct forward to thread for DUA-dest packet from backbone
-        * Fix DUA-TC-19
-        * Added ot-comm directory (refer to OpenThread 1.2 Reference Release QSG.pdf for guide)
-
-
-* 11/12/2019 (commitid:c228415, fork/RC4)
-
-    * Feature included
-        * Low Power
-        * Multicast across Thread Networks
-        * Domain Unicast Address
-
-    * OpenThread Firmware Update
-        * Required updates to support below THCIs
-        * Update BTMF port to 61631 by default and TMF rules (BHC-835)
-        * Allow hoplimit 0 when trying to send an IP packet (BHC-514)
-        * Propagate AQ initized by BR to both mesh and backbone links[BHC-407]
-
-    * THCI update - OpenThread.py (TD)
-        * Support setParentPrio(self, prio)
-        * Support setCSLtout(self, tout=30)
-        * Support setCSLchannel(self, ch=11)
-        * Support setCSLperiod(self, period=500)
-        * Support LinkMetricsSingleReq(self, dst_addr, metrics)
-        * Support LinkMetricsMgmtReq(self, dst_addr, type_, flags, metrics, series_id)
-        * Support LinkMetricsGetReport(self, dst_addr, series_id)
-        * Support LinkMetricsSendProbe(self, dst_addr, ack=True, size=0)
-        * Support setTxPower(self, level)
-        * Support sendUdp(self, destination, port, payload='hello')
-        * Support send_udp(self, interface, destination, port, payload='12ABcd')
-        * Support sendMACcmd(self, enh=False)
-        * Support sendMACdata(self, enh=False)
-        * Support setCSLsuspension(self, suspend)
-        * Support role_transition(self, role)
-        * Support registerMulticast(self, sAddr='ff04::1234:777a:1')
-        * Support sendMlrReq(self, destAddr='', listAddr=[], timeout=None
-        * Support registerDUA(self, destAddr='', sMleId='', sAddr='')
-        * Support migrateNetwork(self, channel=None, net_name=None)
-        * Support clear_cache(self)
-        * Support set_max_addrs_per_child(self, num)
-        * Update setKeepAliveTimeOut() to set ChildTimeout
-        * Update ping(self, strDestination, ilength=0, hop_limit=None, timeout=5)
-
-    * THCI update - OpenThread_Wpanctl.py (BBR)
-        * Support two bytes security policy flags
-        * Support setupHost() (Host role)
-        * Support setBbrDataset(self, MlrTimeout=None, ReRegDelay=None)
-        * Support config_next_dua_status_rsp(self, mliid, status_code)
-          (mliid None for any or not None for specific registration)
-        * Support config_next_mlr_status_rsp(self, status_code)
-        * Support clear_cache(self)
-        * Support send_udp(self, interface, dst, port, payload)
-        * Support ip_neighbors_flush(self)
-        * Support ip_neighbors_add(self, addr, lladdr)
-        * Support get_eth_ll(self)
-        * Support send_udp()
-        * Update setKeepAliveTimeOut() to set ChildTimeout
-        * Update ping(self, strDestination, ilength=0, hop_limit=None, timeout=5)
+        * Update to latest openthread/ot-commissioner cert branch

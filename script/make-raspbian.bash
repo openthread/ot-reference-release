@@ -31,7 +31,7 @@ set -euxo pipefail
 
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
 echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
-echo "IN_CHINA=$IN_CHINA"
+echo "IN_CHINA=${IN_CHINA:=0}"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
 if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
