@@ -272,11 +272,11 @@ prebuild_and_build()
 
                 thread_version=1.2 build_type="USB_trans" build "${options[@]}" "$@"
                 ;;
-            efr32*)
+            efr32mg12)
                 options+=("${build_1_3_options_efr32[@]}")
                 platform_repo=ot-efr32
 
-                thread_version=1.2 build_script_flags="--skip-silabs-apps" build "${options[@]}" "$@"
+                thread_version=1.2 build_script_flags="--skip-silabs-apps" build "-DBOARD=brd4166a" "${options[@]}" "$@"
                 ;;
         esac
     else
