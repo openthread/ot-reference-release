@@ -128,7 +128,6 @@ package()
         return
     fi
     arm-none-eabi-objcopy -O ihex "$binary_path" "${hex_file}"
-    arm-none-eabi-objcopy -O ihex "$binary_path" "${hex_file}"
 
     # Zip
     local zip_file="${basename}-${thread_version}-${timestamp}-${commit_id}.zip"
