@@ -118,8 +118,10 @@ package()
     thread_version=${thread_version?}
 
     # Get build info
-    local commit_id=$(cd "${repo_dir}"/openthread && git rev-parse --short HEAD)
-    local timestamp=$(date +%Y%m%d)
+    local commit_id
+    local timestamp
+    commit_id=$(cd "${repo_dir}"/openthread && git rev-parse --short HEAD)
+    timestamp=$(date +%Y%m%d)
 
     # Generate .hex file
     local hex_file="${basename}"-"${thread_version}".hex
@@ -160,7 +162,7 @@ build()
     case "${thread_version}" in
         # Build OpenThread 1.2
         "1.2")
-            cd ${platform_repo}
+            cd "${platform_repo}"
             git clean -xfd
 
             # Use OpenThread from top-level of repo
@@ -169,14 +171,14 @@ build()
 
             # Build
             build_dir=${OT_CMAKE_BUILD_DIR:-"${repo_dir}"/build-"${thread_version}"/"${platform}"}
-            OT_CMAKE_BUILD_DIR=${build_dir} ./script/build ${build_script_flags:-} ${platform} ${build_type:-} "$@"
+            OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build ${build_script_flags:-} "${platform}" ${build_type:-} "$@"
 
             # Package and distribute
             local dist_apps=(
                 ot-cli-ftd
                 ot-rcp
             )
-            for app in ${dist_apps[@]}; do
+            for app in "${dist_apps[@]}"; do
                 package "${app}"
             done
 
@@ -195,15 +197,15 @@ build()
             ./bootstrap
 
             # Build
-            make -f examples/Makefile-${platform} "${options[@]}" "$@"
+            make -f examples/Makefile-"${platform}" "${options[@]}" "$@"
 
             # Package and distribute
             local dist_apps=(
                 ot-cli-ftd
                 ot-rcp
             )
-            for app in ${dist_apps[@]}; do
-                package ${app} ${thread_version} output/${platform}/bin/${app}
+            for app in "${dist_apps[@]}"; do
+                package "${app}" "${thread_version}" output/"${platform}"/bin/"${app}"
             done
 
             # Clean up
@@ -211,7 +213,7 @@ build()
             ;;
     esac
 
-    cd ${repo_dir}
+    cd "${repo_dir}"
 }
 
 die() { echo "$*" 1>&2 ; exit 1; }
@@ -295,15 +297,15 @@ main()
     fi
 
     # Print OUTPUT_ROOT. Error if OUTPUT_ROOT is not defined
-    OUTPUT_ROOT=$(realpath ${OUTPUT_ROOT?})
+    OUTPUT_ROOT=$(realpath "${OUTPUT_ROOT?}")
     echo "OUTPUT_ROOT=${OUTPUT_ROOT}"
-    mkdir -p ${OUTPUT_ROOT}
+    mkdir -p "${OUTPUT_ROOT}"
 
-    for p in ${platforms[@]}; do
+    for p in "${platforms[@]}"; do
         # Check if the platform is supported.
         echo "${OT_PLATFORMS[@]}" | grep -wq "${p}" || die "ERROR: Unsupported platform: ${p}"
-        printf "\n\n======================================\nBuilding firmware for ${p}\n======================================\n\n"
-        prebuild_and_build ${p}
+        printf "\n\n======================================\nBuilding firmware for %s\n======================================\n\n" "${p}"
+        prebuild_and_build "${p}"
     done
 
 }

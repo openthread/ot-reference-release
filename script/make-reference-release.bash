@@ -39,12 +39,12 @@ main()
     echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
     mkdir -p build
     OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)")
-    mkdir -p $OUTPUT_ROOT
+    mkdir -p "$OUTPUT_ROOT"
 
     # ==========================================================================
     # Build firmware
     # ==========================================================================
-    for platform in ${OT_PLATFORMS[@]}; do
+    for platform in "${OT_PLATFORMS[@]}"; do
         OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${platform}/ ./script/make-firmware.bash "${platform}"
     done
 
@@ -52,8 +52,8 @@ main()
     # Build THCI
     # ==========================================================================
     if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-    mkdir -p "$OUTPUT_ROOT"/thci
-    OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+        mkdir -p "$OUTPUT_ROOT"/thci
+        OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
     fi
 
     # ==========================================================================
