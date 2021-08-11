@@ -17,3 +17,6 @@
 [submodule "openthread-1.1"]
 	path = openthread-1.1
 	url = https://github.com/openthread/openthread.git
+[submodule "ot-efr32"]
+	path = ot-efr32
+	url = https://github.com/openthread/ot-efr32

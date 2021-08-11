@@ -29,22 +29,44 @@
 
 set -euxo pipefail
 
-mkdir -p build
+readonly OT_PLATFORMS=(nrf52840 efr32mg12)
 
-echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
+main()
+{
+    # ==========================================================================
+    # Prebuild
+    # ==========================================================================
+    echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
+    mkdir -p build
+    OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)")
+    mkdir -p $OUTPUT_ROOT
 
-OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)")
+    # ==========================================================================
+    # Build firmware
+    # ==========================================================================
+    for platform in ${OT_PLATFORMS[@]}; do
+        OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${platform}/ ./script/make-firmware.bash "${platform}"
+    done
 
-mkdir -p "$OUTPUT_ROOT"/fw_dongle/
-OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle/ ./script/make-firmware.bash
+    # ==========================================================================
+    # Build THCI
+    # ==========================================================================
+    if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
+    mkdir -p "$OUTPUT_ROOT"/thci
+    OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+    fi
 
-if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-  mkdir -p "$OUTPUT_ROOT"/thci
-  OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
-fi
+    # ==========================================================================
+    # Build raspian
+    # ==========================================================================
+    mkdir -p "$OUTPUT_ROOT"
+    OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
 
-mkdir -p "$OUTPUT_ROOT"
-OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
+    # ==========================================================================
+    # Package docs
+    # ==========================================================================
+    cp -r doc/* "$OUTPUT_ROOT"
+    cp CHANGELOG.txt "$OUTPUT_ROOT"
+}
 
-cp -r doc/* "$OUTPUT_ROOT"
-cp CHANGELOG.txt "$OUTPUT_ROOT"
+main "$@"
