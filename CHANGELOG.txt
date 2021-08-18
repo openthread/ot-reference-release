@@ -13,6 +13,11 @@ FEATURES
 
 CHANGELOG
 ==========
+* 08/18/2021 (commitid:95c5cb793, main)
+    * Add efr32mg12 (brd4166a) support for Thread 1.3 builds
+
+    * Build scripts
+        * Refactor to allow new platforms to be added easily
 
 * 06/15/2021 (commitid:4b36e5115, main)
 

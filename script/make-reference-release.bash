@@ -57,7 +57,7 @@ main()
     fi
 
     # ==========================================================================
-    # Build raspian
+    # Build raspbian
     # ==========================================================================
     mkdir -p "$OUTPUT_ROOT"
     OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
