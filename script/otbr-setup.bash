@@ -35,6 +35,7 @@ export PATH=$PATH:/usr/local/bin
 
 REFERENCE_RELEASE_TYPE=$1
 IN_CHINA=$2
+REFERENCE_PLATFORM=$3
 
 if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
   readonly BUILD_OPTIONS=(
@@ -90,6 +91,22 @@ su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 if [ "$REFERENCE_RELEASE_TYPE" = "certification" ]; then
   cd /home/pi/repo/
   ./script/make-commissioner.bash
+fi
+
+# nRF Connect SDK related actions
+if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
+  apt-get install -y --no-install-recommends vim wiringpi
+  pip install nrfutil
+
+  # add calling of link_dongle.py script at startup to update symlink to the dongle
+  sed -i '/exit 0/d' /etc/rc.local
+  grep -qxF 'sudo chmod a+x /home/pi/repo/script/link_dongle.py' /etc/rc.local || echo 'sudo chmod a+x /home/pi/repo/script/link_dongle.py' >>/etc/rc.local
+  grep -qxF 'sudo /home/pi/repo/script/link_dongle.py' /etc/rc.local || echo 'sudo /home/pi/repo/script/link_dongle.py' >>/etc/rc.local
+  grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
+  echo 'exit 0' >>/etc/rc.local
+
+  # update testharness-discovery script to fix autodiscovery issue
+  sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
 fi
 
 sync
