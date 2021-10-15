@@ -294,7 +294,7 @@ build()
 
 deploy_ncs()
 {
-    local commit_hash=$(<${script_dir}'/../config/sdk-nrf-commit')
+    local commit_hash=$(<${script_dir}'/../config/ncs/sdk-nrf-commit')
 
     sudo apt install --no-install-recommends git cmake ninja-build gperf \
         ccache dfu-util device-tree-compiler wget \
@@ -334,9 +334,9 @@ build_ncs()
   deploy_ncs
 
   # Build folder | nrf-sdk sample | Sample configuration
-  local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/overlay-cli-1_1.conf")
-  local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/overlay-cli-1_2.conf")
-  local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/overlay-rcp-1_2.conf")
+  local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_1.conf")
+  local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
+  local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
   local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@])
 
   cd nrf
