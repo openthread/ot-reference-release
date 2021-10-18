@@ -29,10 +29,11 @@
 
 set -euxo pipefail
 
-IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip
+IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip
 echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=${IN_CHINA:=0}"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
+echo "REFERENCE_PLATFORM=${REFERENCE_PLATFORM?}"
 
 if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
   echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
@@ -65,7 +66,7 @@ main() {
     sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
     sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
     sudo ./qemu-setup.sh "$IMAGE_DIR"
-    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA"
+    sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}"
     sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
     echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
     echo "dtoverlay=pi3-disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt

@@ -29,7 +29,7 @@
 
 set -euxo pipefail
 
-readonly OT_PLATFORMS=(nrf52840 efr32mg12)
+readonly OT_PLATFORMS=(nrf52840 efr32mg12 ncs)
 
 main()
 {
@@ -44,9 +44,7 @@ main()
     # ==========================================================================
     # Build firmware
     # ==========================================================================
-    for platform in "${OT_PLATFORMS[@]}"; do
-        OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${platform}/ ./script/make-firmware.bash "${platform}"
-    done
+    OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
 
     # ==========================================================================
     # Build THCI
@@ -65,7 +63,14 @@ main()
     # ==========================================================================
     # Package docs
     # ==========================================================================
-    cp -r doc/* "$OUTPUT_ROOT"
+    case "${REFERENCE_PLATFORM}" in
+        ncs*)
+            cp -r doc/nRF5* "$OUTPUT_ROOT"
+            ;;
+        *)
+            cp -r doc/OpenThread* "$OUTPUT_ROOT"
+            ;;
+    esac
     cp CHANGELOG.txt "$OUTPUT_ROOT"
 }
 

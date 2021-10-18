@@ -34,9 +34,15 @@ echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 mkdir -p "$OUTPUT_ROOT"/ot-comm
 
 (
-  cd ot-br-posix/third_party/openthread/repo/tools/harness-thci
-  cp OpenThread_BR.py "$OUTPUT_ROOT"
-  cp OpenThread.py "$OUTPUT_ROOT"
+  cp ot-br-posix/third_party/openthread/repo/tools/harness-thci/OpenThread_BR.py "$OUTPUT_ROOT"
+  case "${REFERENCE_PLATFORM}" in
+    nrf*)
+      cp ot-br-posix/third_party/openthread/repo/tools/harness-thci/OpenThread.py "$OUTPUT_ROOT"
+      ;;
+    ncs*)
+      cp thci/*.py "$OUTPUT_ROOT"
+      ;;
+  esac
 )
 
 (
