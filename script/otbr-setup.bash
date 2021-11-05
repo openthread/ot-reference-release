@@ -96,6 +96,7 @@ fi
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
   apt-get install -y --no-install-recommends vim wiringpi
+  pip install wrapt==1.12.1
   pip install nrfutil
 
   # add calling of link_dongle.py script at startup to update symlink to the dongle
