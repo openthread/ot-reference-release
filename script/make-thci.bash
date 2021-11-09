@@ -33,14 +33,34 @@ echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 
 mkdir -p "$OUTPUT_ROOT"/ot-comm
 
+# Args:
+# - $1 - src_path: Source path of the THCI file
+# - $2 - out_name: Name of the output file
+ncs_adapt()
+{
+  echo ${1}
+  local src_path=${1}
+  local out_path="$OUTPUT_ROOT"/${2}
+
+  cp ${src_path} ${out_path}
+  sed -i 's/Device : OpenThread/Device : OTNCS/g' ${out_path}
+  sed -i 's/Class : OpenThread/Class : OTNCS/g' ${out_path}
+  sed -i 's/class OpenThread(/class OTNCS(/g' ${out_path}
+  sed -i 's/class OpenThread_/class OTNCS_/g' ${out_path}
+  sed -i 's/THCI.OpenThread/THCI.OTNCS/g' ${out_path}
+  sed -i 's/super(OpenThread/super(OTNCS/g' ${out_path}
+}
+
+src_dir=openthread/tools/harness-thci
 (
-  cp ot-br-posix/third_party/openthread/repo/tools/harness-thci/OpenThread_BR.py "$OUTPUT_ROOT"
   case "${REFERENCE_PLATFORM}" in
     nrf*)
-      cp ot-br-posix/third_party/openthread/repo/tools/harness-thci/OpenThread.py "$OUTPUT_ROOT"
+      cp ${src_dir}/OpenThread_BR.py "$OUTPUT_ROOT"
+      cp ${src_dir}/OpenThread.py "$OUTPUT_ROOT"
       ;;
     ncs*)
-      cp thci/*.py "$OUTPUT_ROOT"
+      ncs_adapt ${src_dir}/OpenThread.py OTNCS.py
+      ncs_adapt ${src_dir}/OpenThread_BR.py OTNCS_BR.py
       ;;
   esac
 )

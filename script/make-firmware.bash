@@ -198,9 +198,7 @@ build_ot()
             done
 
             # Clean up
-            rm -rf openthread
             git clean -xfd
-            git submodule update --force
             ;;
 
         # Build OpenThread 1.1
@@ -304,7 +302,7 @@ deploy_ncs()
     mkdir -p ${script_dir}/../ncs
     cd ${script_dir}/../ncs
     unset ZEPHYR_BASE
-    west init -m https://github.com/nrfconnect/sdk-nrf --mr master || true
+    west init -m https://github.com/nrfconnect/sdk-nrf --mr main || true
     cd nrf
     git fetch origin
     git reset --hard "$commit_hash" || die "ERROR: unable to checkout the specified sdk-nrf commit."

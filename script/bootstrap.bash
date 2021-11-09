@@ -102,7 +102,7 @@ IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
 IMAGE_FILE="$IMAGE_NAME".img
 [ -f "$TOOLS_HOME"/images/"$IMAGE_FILE" ] || {
   # unit MB
-  EXPAND_SIZE=2048
+  EXPAND_SIZE=4096
 
   [ -d "$TOOLS_HOME"/images ] || mkdir -p "$TOOLS_HOME"/images
 
