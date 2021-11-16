@@ -64,7 +64,7 @@ main() {
     cd docker-rpi-emu/scripts
     sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
     sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
-    sudo tar xzf "$STAGE_DIR"/repo.tar.gz --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
+    sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
     sudo ./qemu-setup.sh "$IMAGE_DIR"
     sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}"
     sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
