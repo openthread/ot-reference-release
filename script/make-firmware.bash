@@ -51,6 +51,7 @@ readonly build_1_3_options_common=(
     "-DOT_SERVICE=ON"
     "-DOT_DNSSD_SERVER=ON"
     "-DOT_SRP_CLIENT=ON"
+    '-DOT_BOOTLOADER=USB'
 )
 
 readonly build_1_3_options_efr32=(
@@ -58,7 +59,7 @@ readonly build_1_3_options_efr32=(
 )
 
 readonly build_1_3_options_nrf=(
-    ""
+    '-DOT_BOOTLOADER=USB'
 )
 
 readonly build_1_2_options_common=(
