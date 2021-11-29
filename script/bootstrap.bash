@@ -63,7 +63,7 @@ install_common_dependencies() {
     coreutils
 }
 
-install_openthread_binraries() {
+install_openthread_binaries() {
   pip3 install -U cmake
   cd third_party/openthread/repo
   mkdir -p build && cd build
