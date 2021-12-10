@@ -101,8 +101,6 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
 
   # add calling of link_dongle.py script at startup to update symlink to the dongle
   sed -i '/exit 0/d' /etc/rc.local
-  grep -qxF 'sudo chmod a+x /home/pi/repo/script/link_dongle.py' /etc/rc.local || echo 'sudo chmod a+x /home/pi/repo/script/link_dongle.py' >>/etc/rc.local
-  grep -qxF 'sudo /home/pi/repo/script/link_dongle.py' /etc/rc.local || echo 'sudo /home/pi/repo/script/link_dongle.py' >>/etc/rc.local
   grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
   echo 'exit 0' >>/etc/rc.local
 
