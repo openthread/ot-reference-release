@@ -306,7 +306,7 @@ deploy_ncs()
     cd nrf
     git fetch origin
     git reset --hard "$commit_hash" || die "ERROR: unable to checkout the specified sdk-nrf commit."
-    west update
+    west update -n -o=--depth=1
     cd ..
     pip3 install --user -r zephyr/scripts/requirements.txt
     pip3 install --user -r nrf/scripts/requirements.txt
