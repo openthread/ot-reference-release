@@ -86,6 +86,8 @@ pip3 install scikit-build
 pip3 install cmake==3.10.3
 cmake --version
 
+pip3 install zeroconf
+
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
 if [ "$REFERENCE_RELEASE_TYPE" = "certification" ]; then
