@@ -41,6 +41,7 @@ repo_dir="$(dirname "$script_dir")"
 # Global Vars
 platform=""
 build_dir=""
+build_script_flags=()
 NRFUTIL=""
 
 readonly build_1_3_options_common=(
@@ -184,7 +185,12 @@ build_ot()
 
             # Build
             build_dir=${OT_CMAKE_BUILD_DIR:-"${repo_dir}"/build-"${thread_version}"/"${platform}"}
-            OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build "${build_script_flags:-}" "${platform}" "${build_type:-}" "$@"
+
+            if [ -z "${build_script_flags[@]}" ]; then
+                OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build "${platform}" "${build_type:-}" "$@"
+            else
+                OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build "${build_script_flags[@]}" "${platform}" "${build_type:-}" "$@"
+            fi
 
             # Package and distribute
             local dist_apps=(
@@ -282,8 +288,8 @@ build()
             efr32mg12)
                 options+=("${build_1_3_options_efr32[@]}")
                 platform_repo=ot-efr32
-
-                thread_version=1.2 build_script_flags="--skip-silabs-apps" build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                build_script_flags=("--skip-silabs-apps")
+                thread_version=1.2 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
                 ;;
         esac
     else
@@ -342,8 +348,7 @@ build_ncs()
     local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
     local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
 
-    # shellcheck disable=SC2206
-    local variants=(${cli_1_1[@]} ${cli_1_2[@]} ${rcp_1_2[@]})
+    local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@])
 
     cd nrf
     for variant in "${variants[@]}"; do
