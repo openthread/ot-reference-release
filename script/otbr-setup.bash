@@ -36,28 +36,70 @@ export PATH=$PATH:/usr/local/bin
 REFERENCE_RELEASE_TYPE=$1
 IN_CHINA=$2
 REFERENCE_PLATFORM=$3
+OPENTHREAD_COMMIT_HASH=$4
+OT_BR_POSIX_COMMIT_HASH=$5
 
 if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-    readonly BUILD_OPTIONS=(
-        'INFRA_IF_NAME=eth0'
-        'RELEASE=1'
-        'REFERENCE_DEVICE=1'
-        'BACKBONE_ROUTER=1'
-        'BORDER_ROUTING=0'
-        'NETWORK_MANAGER=0'
-        'NAT64=0'
-        'DNS64=0'
-        'DHCPV6_PD=0'
-        'WEB_GUI=0'
-        'REST_API=0'
-        'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
-    )
+    case "${REFERENCE_PLATFORM}" in
+        efr32mg12)
+            readonly BUILD_OPTIONS=(
+                'INFRA_IF_NAME=eth0'
+                'RELEASE=1'
+                'REFERENCE_DEVICE=1'
+                'BACKBONE_ROUTER=1'
+                'BORDER_ROUTING=0'
+                'NETWORK_MANAGER=0'
+                'NAT64=0'
+                'DNS64=0'
+                'DHCPV6_PD=0'
+                'WEB_GUI=0'
+                'REST_API=0'
+                "OTBR_OPTIONS=\"-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF -DOT_RCP_RESTORATION_MAX_COUNT=100 -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH}\""
+            )
+            ;;
+        *)
+            readonly BUILD_OPTIONS=(
+                'INFRA_IF_NAME=eth0'
+                'RELEASE=1'
+                'REFERENCE_DEVICE=1'
+                'BACKBONE_ROUTER=1'
+                'BORDER_ROUTING=0'
+                'NETWORK_MANAGER=0'
+                'NAT64=0'
+                'DNS64=0'
+                'DHCPV6_PD=0'
+                'WEB_GUI=0'
+                'REST_API=0'
+                'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
+            )
+            ;;
+    esac
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
-    readonly BUILD_OPTIONS=(
-        'RELEASE=1'
-        'NETWORK_MANAGER=0'
-        'REFERENCE_DEVICE=1'
-    )
+    case "${REFERENCE_PLATFORM}" in
+        efr32mg12)
+            readonly BUILD_OPTIONS=(
+                'INFRA_IF_NAME=eth0'
+                'RELEASE=1'
+                'REFERENCE_DEVICE=1'
+                'BACKBONE_ROUTER=1'
+                'BORDER_ROUTING=1'
+                'NETWORK_MANAGER=0'
+                'NAT64=1'
+                'DNS64=1'
+                'DHCPV6_PD=0'
+                'WEB_GUI=0'
+                'REST_API=0'
+                "OTBR_OPTIONS=\"-DOT_BORDER_ROUTING=ON -DOT_FULL_LOGS=ON -DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON -DOT_SRP_CLIENT=ON -DOT_TREL=ON -DOT_RCP_RESTORATION_MAX_COUNT=100 -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH}\""
+            )
+            ;;
+        *)
+            readonly BUILD_OPTIONS=(
+                'RELEASE=1'
+                'NETWORK_MANAGER=0'
+                'REFERENCE_DEVICE=1'
+            )
+            ;;
+    esac
 fi
 
 configure_apt_source()
