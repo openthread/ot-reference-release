@@ -29,6 +29,15 @@
 
 set -euxo pipefail
 
+if [[ -n ${BASH_SOURCE[0]} ]]; then
+    script_path="${BASH_SOURCE[0]}"
+else
+    script_path="$0"
+fi
+
+script_dir="$(dirname "$(realpath "$script_path")")"
+repo_dir="$(dirname "$script_dir")"
+
 IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip
 echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=${IN_CHINA:=0}"
@@ -42,7 +51,7 @@ fi
 
 BUILD_TARGET=raspbian-gcc
 STAGE_DIR=/tmp/raspbian
-IMAGE_DIR=/media/rpi
+IMAGE_DIR=${repo_dir}/mnt-rpi
 TOOLS_HOME=$HOME/.cache/tools
 
 cleanup()
@@ -74,8 +83,10 @@ main()
 
     python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
 
-    sudo mkdir -p "$IMAGE_DIR"
-    sudo script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
+    mkdir -p "$IMAGE_DIR"
+    chown -R $USER: "$IMAGE_DIR"
+    ls -alh "$IMAGE_DIR"
+    script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
 
     (
         cd docker-rpi-emu/scripts
