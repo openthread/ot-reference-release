@@ -1,6 +1,5 @@
 # ot-reference-release
 
-
 ## Usage
 
 Clone this repository:
@@ -38,6 +37,7 @@ $ REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=certification IN_CHINA=1 SD
 ```
 
 When `REFERENCE_RELEASE_TYPE` is `certification`, reference release contains following components:
+
 - Raspberry Pi image containing OTBR service and OT Commissioner
 - Firmware
 - THCI
@@ -45,12 +45,14 @@ When `REFERENCE_RELEASE_TYPE` is `certification`, reference release contains fol
 - Quick start guide
 
 When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following components:
+
 - Raspberry Pi image containing OTBR service with border routing feature and service registry feature
 - Firmware
 - Change log
 - Quick start guide
 
 **Note**: Currently, only the following boards are supported for CLI/RCP firmwares:
+
 - nRF52840 dongles
 - EFR32MG12 BRD4166A boards
 

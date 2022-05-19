@@ -28,20 +28,20 @@ set -euxo pipefail
 
 # Check inputs
 if [ "$#" -ne 2 ]; then
-	echo "Usage: $0 IMAGE MOUNT"
-	echo "IMAGE - raspberry pi .img file"
-	echo "MOUNT - mount location in the file system"
-	exit
+    echo "Usage: $0 IMAGE MOUNT"
+    echo "IMAGE - raspberry pi .img file"
+    echo "MOUNT - mount location in the file system"
+    exit
 fi
 
 if [ ! -f "$1" ]; then
-	echo "Image file $1 does not exist"
-	exit 1
+    echo "Image file $1 does not exist"
+    exit 1
 fi
 
 if [ ! -d "$2" ]; then
-	echo "Mount point $2 does not exist"
-	exit 2
+    echo "Mount point $2 does not exist"
+    exit 2
 fi
 
 echo "Attempting to mount $1 to $2"

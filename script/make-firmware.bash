@@ -120,7 +120,7 @@ distribute()
     local zip_file="$2-$3-$4-$5.zip"
 
     case "${platform}" in
-        nrf*|ncs*)
+        nrf* | ncs*)
             ${NRFUTIL} pkg generate --debug-mode --hw-version 52 --sd-req 0 --application "${hex_file}" --key-file /tmp/private.pem "${zip_file}"
             ;;
         *)
@@ -229,7 +229,11 @@ build_ot()
     cd "${repo_dir}"
 }
 
-die() { echo "$*" 1>&2 ; exit 1; }
+die()
+{
+    echo "$*" 1>&2
+    exit 1
+}
 
 nrfutil_setup()
 {
@@ -328,23 +332,23 @@ package_ncs()
 
 build_ncs()
 {
-  mkdir -p "$OUTPUT_ROOT"
-  deploy_ncs
+    mkdir -p "$OUTPUT_ROOT"
+    deploy_ncs
 
-  # Build folder | nrf-sdk sample | Sample configuration
-  local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_1.conf")
-  local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
-  local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
-  local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@])
+    # Build folder | nrf-sdk sample | Sample configuration
+    local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_1.conf")
+    local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
+    local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
+    local variants=(${cli_1_1[@]} ${cli_1_2[@]} ${rcp_1_2[@]})
 
-  cd nrf
-  for variant in ${variants[@]}; do
-      west build -d ${!variant:0:1} -b nrf52840dongle_nrf52840 -p always ${!variant:1:1} -- -DOVERLAY_CONFIG=${!variant:2:1} -DDTC_OVERLAY_FILE=usb.overlay
-  done
+    cd nrf
+    for variant in ${variants[@]}; do
+        west build -d ${!variant:0:1} -b nrf52840dongle_nrf52840 -p always ${!variant:1:1} -- -DOVERLAY_CONFIG=${!variant:2:1} -DDTC_OVERLAY_FILE=usb.overlay
+    done
 
-  package_ncs "ot-cli-ftd" "1.1"
-  package_ncs "ot-cli-ftd" "1.2"
-  package_ncs "ot-rcp" "1.2"
+    package_ncs "ot-cli-ftd" "1.1"
+    package_ncs "ot-cli-ftd" "1.2"
+    package_ncs "ot-rcp" "1.2"
 }
 
 main()
@@ -369,7 +373,7 @@ main()
         printf "\n\n======================================\nBuilding firmware for %s\n======================================\n\n" "${p}"
         platform=${p}
         case "${platform}" in
-            nrf*|ncs*)
+            nrf* | ncs*)
                 nrfutil_setup
                 ;;
         esac

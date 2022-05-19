@@ -38,34 +38,35 @@ IN_CHINA=$2
 REFERENCE_PLATFORM=$3
 
 if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
-  readonly BUILD_OPTIONS=(
-    'INFRA_IF_NAME=eth0'
-    'RELEASE=1'
-    'REFERENCE_DEVICE=1'
-    'BACKBONE_ROUTER=1'
-    'BORDER_ROUTING=0'
-    'NETWORK_MANAGER=0'
-    'NAT64=0'
-    'DNS64=0'
-    'DHCPV6_PD=0'
-    'WEB_GUI=0'
-    'REST_API=0'
-    'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
-  )
+    readonly BUILD_OPTIONS=(
+        'INFRA_IF_NAME=eth0'
+        'RELEASE=1'
+        'REFERENCE_DEVICE=1'
+        'BACKBONE_ROUTER=1'
+        'BORDER_ROUTING=0'
+        'NETWORK_MANAGER=0'
+        'NAT64=0'
+        'DNS64=0'
+        'DHCPV6_PD=0'
+        'WEB_GUI=0'
+        'REST_API=0'
+        'OTBR_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"'
+    )
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
-  readonly BUILD_OPTIONS=(
-    'RELEASE=1'
-    'NETWORK_MANAGER=0'
-    'REFERENCE_DEVICE=1'
-  )
+    readonly BUILD_OPTIONS=(
+        'RELEASE=1'
+        'NETWORK_MANAGER=0'
+        'REFERENCE_DEVICE=1'
+    )
 fi
 
-configure_apt_source() {
-  if [ "$IN_CHINA" = 1 ]; then
-    echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi
+configure_apt_source()
+{
+    if [ "$IN_CHINA" = 1 ]; then
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi
 deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi' | sudo tee /etc/apt/sources.list
-    echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
-  fi
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
+    fi
 }
 configure_apt_source
 
@@ -91,23 +92,23 @@ pip3 install zeroconf
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
 if [ "$REFERENCE_RELEASE_TYPE" = "certification" ]; then
-  cd /home/pi/repo/
-  ./script/make-commissioner.bash
+    cd /home/pi/repo/
+    ./script/make-commissioner.bash
 fi
 
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
-  apt-get install -y --no-install-recommends vim wiringpi
-  pip install wrapt==1.12.1
-  pip install nrfutil
+    apt-get install -y --no-install-recommends vim wiringpi
+    pip install wrapt==1.12.1
+    pip install nrfutil
 
-  # add calling of link_dongle.py script at startup to update symlink to the dongle
-  sed -i '/exit 0/d' /etc/rc.local
-  grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
-  echo 'exit 0' >>/etc/rc.local
+    # add calling of link_dongle.py script at startup to update symlink to the dongle
+    sed -i '/exit 0/d' /etc/rc.local
+    grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
+    echo 'exit 0' >>/etc/rc.local
 
-  # update testharness-discovery script to fix autodiscovery issue
-  sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
+    # update testharness-discovery script to fix autodiscovery issue
+    sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
 fi
 
 sync
