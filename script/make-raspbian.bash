@@ -89,15 +89,17 @@ main()
     script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
 
     (
+        OPENTHREAD_COMMIT_HASH=$(cd "${repo_dir}"/openthread && git rev-parse --short HEAD)
+        OT_BR_POSIX_COMMIT_HASH=$(cd "${repo_dir}"/ot-br-posix && git rev-parse --short HEAD)
         cd docker-rpi-emu/scripts
         sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
         sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
         sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
         sudo ./qemu-setup.sh "$IMAGE_DIR"
-        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}"
+        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}"
         sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
         echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
-        echo "dtoverlay=pi3-disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+        echo "dtoverlay=disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
         sudo touch "$IMAGE_DIR"/boot/ssh && sync && sleep 1
         sudo ./qemu-cleanup.sh "$IMAGE_DIR"
         LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
@@ -106,11 +108,18 @@ main()
         if [[ ! -f /usr/bin/pishrink.sh ]]; then
             sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
         fi
+        set +e
         sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
+        ret_val=$?
+        # Ignore error when pishrink can't shrink the image any further
+        if [[ $ret_val -ne 11 ]] && [[ $ret_val -ne 0 ]]; then
+            exit $ret_val
+        fi
+        set -e
         if [[ -n ${SD_CARD:=} ]]; then
             sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
         fi
-        IMG_ZIP_FILE=otbr."$(date +%Y%m%d)".img.zip
+        IMG_ZIP_FILE="otbr.${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d).ot_${OPENTHREAD_COMMIT_HASH}.ot-br_${OT_BR_POSIX_COMMIT_HASH}.img.zip"
         (cd $STAGE_DIR && zip "$IMG_ZIP_FILE" otbr.img && mv "$IMG_ZIP_FILE" "$OUTPUT_ROOT")
 
     )
