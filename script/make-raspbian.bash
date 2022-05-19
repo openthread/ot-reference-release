@@ -84,7 +84,7 @@ main()
     python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
 
     mkdir -p "$IMAGE_DIR"
-    chown -R $USER: "$IMAGE_DIR"
+    chown -R "$USER": "$IMAGE_DIR"
     ls -alh "$IMAGE_DIR"
     script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
 

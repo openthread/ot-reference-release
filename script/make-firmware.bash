@@ -43,8 +43,6 @@ platform=""
 build_dir=""
 NRFUTIL=""
 
-readonly OT_PLATFORMS=(nrf52840 efr32mg12 ncs)
-
 readonly build_1_3_options_common=(
     "-DOT_SRP_SERVER=ON"
     "-DOT_ECDSA=ON"
@@ -175,8 +173,8 @@ build_ot()
     mkdir -p "$OUTPUT_ROOT"
 
     case "${thread_version}" in
-        # Build OpenThread 1.2
         "1.2")
+            # Build OpenThread 1.2
             cd "${platform_repo}"
             git clean -xfd
 
@@ -186,7 +184,7 @@ build_ot()
 
             # Build
             build_dir=${OT_CMAKE_BUILD_DIR:-"${repo_dir}"/build-"${thread_version}"/"${platform}"}
-            OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build ${build_script_flags:-} "${platform}" ${build_type:-} "$@"
+            OT_CMAKE_BUILD_DIR="${build_dir}" ./script/build "${build_script_flags:-}" "${platform}" "${build_type:-}" "$@"
 
             # Package and distribute
             local dist_apps=(
@@ -200,9 +198,8 @@ build_ot()
             # Clean up
             git clean -xfd
             ;;
-
-        # Build OpenThread 1.1
         "1.1")
+            # Build OpenThread 1.1
             cd openthread-1.1
 
             # Prep
@@ -296,15 +293,16 @@ build()
 
 deploy_ncs()
 {
-    local commit_hash=$(<${script_dir}'/../config/ncs/sdk-nrf-commit')
+    local commit_hash
+    commit_hash=$(<"${script_dir}"'/../config/ncs/sdk-nrf-commit')
 
     sudo apt install --no-install-recommends git cmake ninja-build gperf \
         ccache dfu-util device-tree-compiler wget \
         python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
         make gcc gcc-multilib g++-multilib libsdl2-dev
     pip3 install --user west
-    mkdir -p ${script_dir}/../ncs
-    cd ${script_dir}/../ncs
+    mkdir -p "${script_dir}"/../ncs
+    cd "${script_dir}"/../ncs
     unset ZEPHYR_BASE
     west init -m https://github.com/nrfconnect/sdk-nrf --mr main || true
     cd nrf
@@ -315,6 +313,8 @@ deploy_ncs()
     pip3 install --user -r zephyr/scripts/requirements.txt
     pip3 install --user -r nrf/scripts/requirements.txt
     pip3 install --user -r bootloader/mcuboot/scripts/requirements.txt
+
+    # shellcheck disable=SC1091
     source zephyr/zephyr-env.sh
     west config manifest.path nrf
 }
@@ -322,8 +322,10 @@ deploy_ncs()
 package_ncs()
 {
     # Get build info
-    local commit_id=$(git rev-parse --short HEAD)
-    local timestamp=$(date +%Y%m%d)
+    local commit_id
+    local timestamp
+    commit_id=$(git rev-parse --short HEAD)
+    timestamp=$(date +%Y%m%d)
 
     distribute "/tmp/ncs_cli_1_1/zephyr/zephyr.hex" "ot-cli-ftd" "1.1" "${timestamp}" "${commit_id}"
     distribute "/tmp/ncs_cli_1_2/zephyr/zephyr.hex" "ot-cli-ftd" "1.2" "${timestamp}" "${commit_id}"
@@ -339,11 +341,13 @@ build_ncs()
     local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_1.conf")
     local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
     local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
+
+    # shellcheck disable=SC2206
     local variants=(${cli_1_1[@]} ${cli_1_2[@]} ${rcp_1_2[@]})
 
     cd nrf
-    for variant in ${variants[@]}; do
-        west build -d ${!variant:0:1} -b nrf52840dongle_nrf52840 -p always ${!variant:1:1} -- -DOVERLAY_CONFIG=${!variant:2:1} -DDTC_OVERLAY_FILE=usb.overlay
+    for variant in "${variants[@]}"; do
+        west build -d "${!variant:0:1}" -b nrf52840dongle_nrf52840 -p always "${!variant:1:1}" -- -DOVERLAY_CONFIG="${!variant:2:1}" -DDTC_OVERLAY_FILE=usb.overlay
     done
 
     package_ncs "ot-cli-ftd" "1.1"
@@ -353,6 +357,8 @@ build_ncs()
 
 main()
 {
+    readonly OT_PLATFORMS=(nrf52840 efr32mg12 ncs)
+
     local platforms=()
 
     if [[ $# == 0 ]]; then
@@ -382,7 +388,7 @@ main()
                 build_ncs
                 ;;
             *)
-                build
+                build "$@"
                 ;;
         esac
     done

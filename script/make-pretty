@@ -74,8 +74,6 @@ readonly OT_EXCLUDE_DIRS=(
 
 readonly OT_MARKDOWN_SOURCES=('*.md')
 
-readonly OT_SCRIPT_DIR="$(dirname "$0")"/../openthread/script
-
 do_markdown_format()
 {
     echo -e '========================================'
