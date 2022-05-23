@@ -32,53 +32,57 @@ set -euxo pipefail
 TOOLS_HOME="$HOME"/.cache/tools
 [[ -d $TOOLS_HOME ]] || mkdir -p "$TOOLS_HOME"
 
-disable_install_recommends() {
-  OTBR_APT_CONF_FILE=/etc/apt/apt.conf
+disable_install_recommends()
+{
+    OTBR_APT_CONF_FILE=/etc/apt/apt.conf
 
-  if [[ -f ${OTBR_APT_CONF_FILE} ]] && grep Install-Recommends "${OTBR_APT_CONF_FILE}"; then
-    return 0
-  fi
+    if [[ -f ${OTBR_APT_CONF_FILE} ]] && grep Install-Recommends "${OTBR_APT_CONF_FILE}"; then
+        return 0
+    fi
 
-  sudo tee -a /etc/apt/apt.conf <<EOF
+    sudo tee -a /etc/apt/apt.conf <<EOF
 APT::Get::Install-Recommends "false";
 APT::Get::Install-Suggests "false";
 EOF
 }
 
-install_common_dependencies() {
-  # Common dependencies
-  sudo apt-get install --no-install-recommends -y \
-    libdbus-1-dev \
-    ninja-build \
-    expect \
-    net-tools \
-    libboost-dev \
-    libboost-filesystem-dev \
-    libboost-system-dev \
-    libavahi-common-dev \
-    libavahi-client-dev \
-    libreadline-dev \
-    libncurses-dev \
-    libjsoncpp-dev \
-    coreutils
+install_common_dependencies()
+{
+    # Common dependencies
+    sudo apt-get install --no-install-recommends -y \
+        libdbus-1-dev \
+        ninja-build \
+        expect \
+        net-tools \
+        libboost-dev \
+        libboost-filesystem-dev \
+        libboost-system-dev \
+        libavahi-common-dev \
+        libavahi-client-dev \
+        libreadline-dev \
+        libncurses-dev \
+        libjsoncpp-dev \
+        coreutils
 }
 
-install_openthread_binaries() {
-  pip3 install -U cmake
-  cd third_party/openthread/repo
-  mkdir -p build && cd build
+install_openthread_binaries()
+{
+    pip3 install -U cmake
+    cd third_party/openthread/repo
+    mkdir -p build && cd build
 
-  cmake .. -GNinja -DOT_PLATFORM=simulation -DOT_FULL_LOGS=1 -DOT_COMMISSIONER=ON -DOT_JOINER=ON
-  ninja
-  sudo ninja install
+    cmake .. -GNinja -DOT_PLATFORM=simulation -DOT_FULL_LOGS=1 -DOT_COMMISSIONER=ON -DOT_JOINER=ON
+    ninja
+    sudo ninja install
 
-  sudo apt-get install --no-install-recommends -y socat
+    sudo apt-get install --no-install-recommends -y socat
 }
 
-configure_network() {
-  echo 0 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
-  echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/forwarding
-  echo 1 | sudo tee /proc/sys/net/ipv4/conf/all/forwarding
+configure_network()
+{
+    echo 0 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
+    echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/forwarding
+    echo 1 | sudo tee /proc/sys/net/ipv4/conf/all/forwarding
 }
 
 disable_install_recommends
@@ -86,11 +90,11 @@ sudo apt-get update
 install_common_dependencies
 
 if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
-  SOURCE_NAME=mDNSResponder-878.30.4
-  wget https://opensource.apple.com/tarballs/mDNSResponder/$SOURCE_NAME.tar.gz &&
-    tar xvf $SOURCE_NAME.tar.gz &&
-    cd $SOURCE_NAME/mDNSPosix &&
-    make os=linux && sudo make install os=linux
+    SOURCE_NAME=mDNSResponder-878.30.4
+    wget https://opensource.apple.com/tarballs/mDNSResponder/$SOURCE_NAME.tar.gz \
+        && tar xvf $SOURCE_NAME.tar.gz \
+        && cd $SOURCE_NAME/mDNSPosix \
+        && make os=linux && sudo make install os=linux
 fi
 
 # Prepare Raspbian image
@@ -101,19 +105,19 @@ pip3 install git-archive-all
 IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
 IMAGE_FILE="$IMAGE_NAME".img
 [ -f "$TOOLS_HOME"/images/"$IMAGE_FILE" ] || {
-  # unit MB
-  EXPAND_SIZE=4096
+    # unit MB
+    EXPAND_SIZE=4096
 
-  [ -d "$TOOLS_HOME"/images ] || mkdir -p "$TOOLS_HOME"/images
+    [ -d "$TOOLS_HOME"/images ] || mkdir -p "$TOOLS_HOME"/images
 
-  [[ -f "$IMAGE_NAME".zip ]] || curl -LO "$IMAGE_URL"
+    [[ -f "$IMAGE_NAME".zip ]] || curl -LO "$IMAGE_URL"
 
-  unzip "$IMAGE_NAME".zip -d /tmp
+    unzip "$IMAGE_NAME".zip -d /tmp
 
-  (cd /tmp &&
-    dd if=/dev/zero bs=1048576 count="$EXPAND_SIZE" >>"$IMAGE_FILE" &&
-    mv "$IMAGE_FILE" "$TOOLS_HOME"/images/"$IMAGE_FILE")
+    (cd /tmp \
+        && dd if=/dev/zero bs=1048576 count="$EXPAND_SIZE" >>"$IMAGE_FILE" \
+        && mv "$IMAGE_FILE" "$TOOLS_HOME"/images/"$IMAGE_FILE")
 
-  (cd docker-rpi-emu/scripts &&
-    sudo ./expand.sh "$TOOLS_HOME"/images/"$IMAGE_FILE" "$EXPAND_SIZE")
+    (cd docker-rpi-emu/scripts \
+        && sudo ./expand.sh "$TOOLS_HOME"/images/"$IMAGE_FILE" "$EXPAND_SIZE")
 }

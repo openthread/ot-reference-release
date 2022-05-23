@@ -38,37 +38,37 @@ mkdir -p "$OUTPUT_ROOT"/ot-comm
 # - $2 - out_name: Name of the output file
 ncs_adapt()
 {
-  echo ${1}
-  local src_path=${1}
-  local out_path="$OUTPUT_ROOT"/${2}
+    echo "${1}"
+    local src_path="${1}"
+    local out_path="$OUTPUT_ROOT"/"${2}"
 
-  cp ${src_path} ${out_path}
-  sed -i 's/Device : OpenThread/Device : OTNCS/g' ${out_path}
-  sed -i 's/Class : OpenThread/Class : OTNCS/g' ${out_path}
-  sed -i 's/class OpenThread(/class OTNCS(/g' ${out_path}
-  sed -i 's/class OpenThread_/class OTNCS_/g' ${out_path}
-  sed -i 's/THCI.OpenThread/THCI.OTNCS/g' ${out_path}
-  sed -i 's/super(OpenThread/super(OTNCS/g' ${out_path}
+    cp "${src_path}" "${out_path}"
+    sed -i 's/Device : OpenThread/Device : OTNCS/g' "${out_path}"
+    sed -i 's/Class : OpenThread/Class : OTNCS/g' "${out_path}"
+    sed -i 's/class OpenThread(/class OTNCS(/g' "${out_path}"
+    sed -i 's/class OpenThread_/class OTNCS_/g' "${out_path}"
+    sed -i 's/THCI.OpenThread/THCI.OTNCS/g' "${out_path}"
+    sed -i 's/super(OpenThread/super(OTNCS/g' "${out_path}"
 }
 
 src_dir=openthread/tools/harness-thci
 (
-  case "${REFERENCE_PLATFORM}" in
-    nrf*)
-      cp ${src_dir}/OpenThread_BR.py "$OUTPUT_ROOT"
-      cp ${src_dir}/OpenThread.py "$OUTPUT_ROOT"
-      ;;
-    ncs*)
-      ncs_adapt ${src_dir}/OpenThread.py OTNCS.py
-      ncs_adapt ${src_dir}/OpenThread_BR.py OTNCS_BR.py
-      ;;
-  esac
+    case "${REFERENCE_PLATFORM}" in
+        nrf*)
+            cp "${src_dir}/OpenThread_BR.py" "$OUTPUT_ROOT"
+            cp "${src_dir}/OpenThread.py" "$OUTPUT_ROOT"
+            ;;
+        ncs*)
+            ncs_adapt "${src_dir}/OpenThread.py" OTNCS.py
+            ncs_adapt "${src_dir}/OpenThread_BR.py" OTNCS_BR.py
+            ;;
+    esac
 )
 
 (
-  cd ot-commissioner/tools/commissioner_thci
-  cp commissioner.py "$OUTPUT_ROOT"/ot-comm
-  cp commissioner_impl.py "$OUTPUT_ROOT"/ot-comm
+    cd ot-commissioner/tools/commissioner_thci
+    cp commissioner.py "$OUTPUT_ROOT"/ot-comm
+    cp commissioner_impl.py "$OUTPUT_ROOT"/ot-comm
 )
 
 sync

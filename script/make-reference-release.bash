@@ -29,8 +29,6 @@
 
 set -euxo pipefail
 
-readonly OT_PLATFORMS=(nrf52840 efr32mg12 ncs)
-
 main()
 {
     # ==========================================================================

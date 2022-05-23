@@ -28,20 +28,20 @@ set -euxo pipefail
 
 # Check inputs
 if [ "$#" -ne 2 ]; then
-	echo "Usage: $0 IMAGE MOUNT"
-	echo "IMAGE - raspberry pi .img file"
-	echo "MOUNT - mount location in the file system"
-	exit
+    echo "Usage: $0 IMAGE MOUNT"
+    echo "IMAGE - raspberry pi .img file"
+    echo "MOUNT - mount location in the file system"
+    exit
 fi
 
 if [ ! -f "$1" ]; then
-	echo "Image file $1 does not exist"
-	exit 1
+    echo "Image file $1 does not exist"
+    exit 1
 fi
 
 if [ ! -d "$2" ]; then
-	echo "Mount point $2 does not exist"
-	exit 2
+    echo "Mount point $2 does not exist"
+    exit 2
 fi
 
 echo "Attempting to mount $1 to $2"
@@ -49,7 +49,7 @@ echo "Attempting to mount $1 to $2"
 set -e
 
 # Attach loopback device
-LOOP_BASE=$(losetup -f -P --show $1)
+LOOP_BASE=$(sudo losetup -f -P --show "$1")
 
 echo "Attached base loopback at: $LOOP_BASE"
 
@@ -58,7 +58,7 @@ P2_NAME=${LOOP_BASE}p2
 
 # Mount image with the offsets determined above
 mkdir -p "$2"
-mount "$P2_NAME" -o rw /media/rpi
-mount "$P1_NAME" -o rw /media/rpi/boot
+sudo mount "$P2_NAME" -o rw "$2"
+sudo mount "$P1_NAME" -o rw "$2"/boot
 
 echo "Mounted to $2 and $2/boot"
