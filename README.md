@@ -17,7 +17,7 @@ $ git submodule update --init --recursive
 At the root of the repository:
 
 ```
-$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs) REFERENCE_RELEASE_TYPE=(certification|1.3)  [SD_CARD=/dev/...] [IN_CHINA=(0|1)] ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs) REFERENCE_RELEASE_TYPE=(1.2|1.3)  [SD_CARD=/dev/...] [IN_CHINA=(0|1)] ./script/make-reference-release.bash
 ```
 
 This will produce a reference release folder in `./build/`. The folder will be
@@ -33,11 +33,10 @@ China so that you can save time while installing software dependencies.
 For example, if you are in China and want to flash the built image to an SD card:
 
 ```
-$ REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=certification IN_CHINA=1 SD_CARD=/dev/sda ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=1.2 IN_CHINA=1 SD_CARD=/dev/sda ./script/make-reference-release.bash
 ```
 
-When `REFERENCE_RELEASE_TYPE` is `certification`, reference release contains following components:
-
+When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following components:
 - Raspberry Pi image containing OTBR service and OT Commissioner
 - Firmware
 - THCI
@@ -45,8 +44,7 @@ When `REFERENCE_RELEASE_TYPE` is `certification`, reference release contains fol
 - Quick start guide
 
 When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following components:
-
-- Raspberry Pi image containing OTBR service with border routing feature and service registry feature
+- Raspberry Pi image containing OTBR service with border routing feature, service registry feature and OT Commissioner
 - Firmware
 - Change log
 - Quick start guide

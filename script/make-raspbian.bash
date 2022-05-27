@@ -44,9 +44,9 @@ echo "IN_CHINA=${IN_CHINA:=0}"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
 echo "REFERENCE_PLATFORM=${REFERENCE_PLATFORM?}"
 
-if [ "$REFERENCE_RELEASE_TYPE" != "certification" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
-    echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
-    exit 1
+if [ "$REFERENCE_RELEASE_TYPE" != "1.2" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
+  echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
+  exit 1
 fi
 
 BUILD_TARGET=raspbian-gcc

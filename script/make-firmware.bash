@@ -261,7 +261,7 @@ nrfutil_setup()
 
 build()
 {
-    if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
+    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
         build_1_2_options=("${build_1_2_options_common[@]}")
         build_1_1_env=("${build_1_1_env_common[@]}")
 
