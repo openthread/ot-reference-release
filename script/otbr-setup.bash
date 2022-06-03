@@ -39,7 +39,7 @@ REFERENCE_PLATFORM=$3
 OPENTHREAD_COMMIT_HASH=$4
 OT_BR_POSIX_COMMIT_HASH=$5
 
-if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
+if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
             readonly BUILD_OPTIONS=(
@@ -133,7 +133,7 @@ pip3 install zeroconf
 
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
-if [ "$REFERENCE_RELEASE_TYPE" = "certification" ]; then
+if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
     cd /home/pi/repo/
     ./script/make-commissioner.bash
 fi

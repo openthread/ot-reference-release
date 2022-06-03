@@ -38,7 +38,6 @@ mkdir -p "$OUTPUT_ROOT"/ot-comm
 # - $2 - out_name: Name of the output file
 ncs_adapt()
 {
-    echo "${1}"
     local src_path="${1}"
     local out_path="$OUTPUT_ROOT"/"${2}"
 
@@ -51,6 +50,27 @@ ncs_adapt()
     sed -i 's/super(OpenThread/super(OTNCS/g' "${out_path}"
 }
 
+# Args:
+# - $1 - base_path: Base path of the Zephyr build
+get_version()
+{
+    local base_path="${1}"
+    local bin_path="$base_path/zephyr/zephyr.bin"
+
+    grep -ao 'OPENTHREAD/.*[0-2][0-9]:[0-5][0-9]:[0-5][0-9]' "$bin_path"
+}
+
+# Args:
+# - $1 - path: Path of the THCI file
+set_version_string()
+{
+    local path="${1}"
+
+    sed -i "s#OT11_VERSION = 'OPENTHREAD'#OT11_VERSION = '$(get_version /tmp/ncs_cli_1_1)'#g" "${path}"
+    sed -i "s#OT12_VERSION = 'OPENTHREAD'#OT12_VERSION = '$(get_version /tmp/ncs_cli_1_2)'#g" "${path}"
+    sed -i "s#OT13_VERSION = 'OPENTHREAD'#OT13_VERSION = 'Not Supported'#g" "${path}"
+}
+
 src_dir=openthread/tools/harness-thci
 (
     case "${REFERENCE_PLATFORM}" in
@@ -60,6 +80,7 @@ src_dir=openthread/tools/harness-thci
             ;;
         ncs*)
             ncs_adapt "${src_dir}/OpenThread.py" OTNCS.py
+            set_version_string "$OUTPUT_ROOT"/"OTNCS.py"
             ncs_adapt "${src_dir}/OpenThread_BR.py" OTNCS_BR.py
             ;;
     esac

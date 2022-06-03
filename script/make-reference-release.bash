@@ -47,7 +47,7 @@ main()
     # ==========================================================================
     # Build THCI
     # ==========================================================================
-    if [ "${REFERENCE_RELEASE_TYPE?}" = "certification" ]; then
+    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
         mkdir -p "$OUTPUT_ROOT"/thci
         OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
     fi
