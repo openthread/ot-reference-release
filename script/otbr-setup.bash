@@ -163,11 +163,7 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
 
 elif [ "${REFERENCE_PLATFORM?}" = "efr32mg12" ]; then
     # update testharness-discovery script to fix autodiscovery issue
-    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
-        sed -i 's/OpenThread_BR/OTS12_BR/g' /usr/sbin/testharness-discovery
-    elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
-        sed -i 's/OpenThread_BR/OTS13_BR/g' /usr/sbin/testharness-discovery
-    fi
+    sed -i "s/OpenThread_BR/OTS${REFERENCE_RELEASE_TYPE//.}_BR/g" /usr/sbin/testharness-discovery
 fi
 
 sync
