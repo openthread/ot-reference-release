@@ -160,6 +160,10 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
 
     # update testharness-discovery script to fix autodiscovery issue
     sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
+
+elif [ "${REFERENCE_PLATFORM?}" = "efr32mg12" ]; then
+    # update testharness-discovery script to fix autodiscovery issue
+    sed -i "s/OpenThread_BR/OTS${REFERENCE_RELEASE_TYPE//./}_BR/g" /usr/sbin/testharness-discovery
 fi
 
 sync
