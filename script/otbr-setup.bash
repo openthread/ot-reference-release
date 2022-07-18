@@ -149,6 +149,8 @@ fi
 
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
+    wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+    sudo python2 get-pip.py
     apt-get install -y --no-install-recommends vim wiringpi
     pip install wrapt==1.12.1
     pip install nrfutil
