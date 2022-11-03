@@ -97,8 +97,17 @@ if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
         && make os=linux && sudo make install os=linux
 fi
 
+#check version of ubuntu for qemu package name
+REL=`lsb_release -r`
+
+if [[ $REL == *"22.10"* ]]; then
+    QEMU=qemu-system-arm
+else
+    QEMU=qemu
+fi
+
 # Prepare Raspbian image
-sudo apt-get install --no-install-recommends --allow-unauthenticated -y qemu qemu-user-static binfmt-support parted dcfldd
+sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
 
 pip3 install git-archive-all
 
