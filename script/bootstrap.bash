@@ -78,6 +78,23 @@ install_openthread_binaries()
     sudo apt-get install --no-install-recommends -y socat
 }
 
+install_qemu()
+{
+    # Different versions of Linux may support qemu or qemu-system-arm.
+    # Install qemu first. If the installation of qemu fails, try install qemu-system-arm.
+
+    set +e
+    QEMU=qemu
+    sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
+    ret=$?
+    set -e
+
+    if [[ ${ret} != 0 ]]; then
+        QEMU=qemu-system-arm
+        sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
+    fi
+}
+
 configure_network()
 {
     echo 0 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
@@ -97,19 +114,11 @@ if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
         && make os=linux && sudo make install os=linux
 fi
 
-# Different versions of Linux may support qemu or qemu-system-arm.
-# Install qemu first. If the installation of qemu fails, try install qemu-system-arm.
-set +e
-QEMU=qemu
-ret=$(sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd)
-set -e
-
-if [[ "$ret" == *"Package qemu is not available"* ]]; then
-    QEMU=qemu-system-arm
-    sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
-fi
+install_qemu
 
 pip3 install git-archive-all
+
+# Prepare Raspbian image
 
 IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
 IMAGE_FILE="$IMAGE_NAME".img
