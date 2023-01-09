@@ -42,7 +42,9 @@ main()
     # ==========================================================================
     # Build firmware
     # ==========================================================================
-    OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
+    if [ "${REFERENCE_PLATFORM}" != "none" ]; then
+        OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
+    fi
 
     # ==========================================================================
     # Build THCI

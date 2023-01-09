@@ -42,6 +42,7 @@ IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_li
 echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=${IN_CHINA:=0}"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
+echo "OTBR_RCP_BUS=${OTBR_RCP_BUS:=UART}"
 echo "REFERENCE_PLATFORM=${REFERENCE_PLATFORM?}"
 
 if [ "$REFERENCE_RELEASE_TYPE" != "1.2" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ]; then
@@ -96,10 +97,13 @@ main()
         sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
         sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
         sudo ./qemu-setup.sh "$IMAGE_DIR"
-        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}"
+        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}" "${OTBR_RCP_BUS}"
         sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
         echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
         echo "dtoverlay=disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+        if [[ ${OTBR_RCP_BUS} == "SPI" ]]; then
+            echo "dtparam=spi=on" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+        fi
         sudo touch "$IMAGE_DIR"/boot/ssh && sync && sleep 1
         sudo ./qemu-cleanup.sh "$IMAGE_DIR"
         LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)

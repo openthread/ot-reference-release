@@ -17,7 +17,7 @@ $ git submodule update --init --recursive
 At the root of the repository:
 
 ```
-$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs) REFERENCE_RELEASE_TYPE=(1.2|1.3)  [SD_CARD=/dev/...] [IN_CHINA=(0|1)] ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] ./script/make-reference-release.bash
 ```
 
 This will produce a reference release folder in `./build/`. The folder will be
@@ -29,6 +29,9 @@ image containing OpenThread border router service to the SD card.
 
 If `IN_CHINA` is set to 1, the script will prefer to use apt sources based in
 China so that you can save time while installing software dependencies.
+
+`OTBR_RCP_BUS` sets the RCP hardware interface type of Spinel on otbr-agent.
+If this variable is not specified, the interface type is set to `UART` by default.
 
 For example, if you are in China and want to flash the built image to an SD card:
 
@@ -53,6 +56,8 @@ When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following com
 
 - nRF52840 dongles
 - EFR32MG12 BRD4166A boards
+
+If the `REFERENCE_PLATFORM` is set to `none`, the firmware won't be generated.
 
 # Contributing
 
