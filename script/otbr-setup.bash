@@ -39,6 +39,7 @@ REFERENCE_PLATFORM=$3
 OPENTHREAD_COMMIT_HASH=$4
 OT_BR_POSIX_COMMIT_HASH=$5
 OTBR_RCP_BUS=$6
+OTBR_AGENT_OPTS=$7
 
 if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
     case "${REFERENCE_PLATFORM}" in
@@ -120,6 +121,16 @@ deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-f
         echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
     fi
 }
+
+set_otbr_agent_opts()
+{
+    local otbr_default_settings_file="/home/pi/repo/ot-br-posix/src/agent/otbr-agent.default.in"
+    if [ -n "$OTBR_AGENT_OPTS" ]; then
+        sed -i '/OTBR_AGENT_OPTS=.*/d' "${otbr_default_settings_file}"
+        echo "OTBR_AGENT_OPTS=${OTBR_AGENT_OPTS}" >> "${otbr_default_settings_file}"
+    fi
+}
+
 configure_apt_source
 
 echo "127.0.0.1 $(hostname)" >>/etc/hosts
@@ -140,6 +151,8 @@ pip3 install cmake==3.10.3
 cmake --version
 
 pip3 install zeroconf
+
+set_otbr_agent_opts
 
 su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
 
