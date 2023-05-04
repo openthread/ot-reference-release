@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bootstrap
+        run: |
+          cd /tmp
+          sudo apt-get update
+          sudo apt-get --no-install-recommends install -y ninja-build gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          wget --tries 4 --no-check-certificate --quiet https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2 -O gcc-arm.tar.bz2
+          tar xjf gcc-arm.tar.bz2
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          submodules: recursive
+      - name: build reference release for 1.3
+        run: |
+          export PATH=/tmp/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH
+          REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=1.3  ./script/make-reference-release.bash
+      - name: save reference releases
+        uses: actions/upload-artifact@v3
+        with:
+          name: reference-releases
+          path: |
+            build/ot-1.3*
+            retention-days: 1
+            if-no-files-found: error
