@@ -41,74 +41,61 @@ OT_BR_POSIX_COMMIT_HASH=$5
 OTBR_RCP_BUS=$6
 OTBR_RADIO_URL=$7
 
+OTBR_COMMON_OPTIONS="-DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOT_DIAGNOSTIC=ON -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH} -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_POSIX_CONFIG_RCP_BUS=${OTBR_RCP_BUS} -DOTBR_RADIO_URL=${OTBR_RADIO_URL}"
+OTBR_THREAD_1_2_OPTIONS="-DOT_THREAD_VERSION=1.2 -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF"
+OTBR_THREAD_1_3_OPTIONS="-DOT_THREAD_VERSION=1.3 -DOTBR_DNSSD_DISCOVERY_PROXY=ON  -DOTBR_SRP_ADVERTISING_PROXY=ON  -DOT_TREL=ON -DOT_BORDER_ROUTING=ON -DOT_SRP_CLIENT=ON -DOT_DNS_CLIENT=ON -DOT_FULL_LOGS=ON"
+
+build_options=(
+    'INFRA_IF_NAME=eth0'
+    'RELEASE=1'
+    'REFERENCE_DEVICE=1'
+    'BACKBONE_ROUTER=1'
+    'NETWORK_MANAGER=0'
+    'DHCPV6_PD=0'
+    'WEB_GUI=0'
+    'REST_API=0'
+)
+
 if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
-            readonly BUILD_OPTIONS=(
-                'INFRA_IF_NAME=eth0'
-                'RELEASE=1'
-                'REFERENCE_DEVICE=1'
-                'BACKBONE_ROUTER=1'
+            readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=0'
-                'NETWORK_MANAGER=0'
                 'NAT64=0'
                 'DNS64=0'
-                'DHCPV6_PD=0'
-                'WEB_GUI=0'
-                'REST_API=0'
-                "OTBR_OPTIONS=\"-DOT_THREAD_VERSION=1.2 -DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF -DOT_RCP_RESTORATION_MAX_COUNT=100 -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH} -DOT_POSIX_CONFIG_RCP_BUS=${OTBR_RCP_BUS} -DOTBR_RADIO_URL=${OTBR_RADIO_URL}\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS} ${OTBR_COMMON_OPTIONS} -DOT_RCP_RESTORATION_MAX_COUNT=100\""
             )
+            build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         *)
-            readonly BUILD_OPTIONS=(
-                'INFRA_IF_NAME=eth0'
-                'RELEASE=1'
-                'REFERENCE_DEVICE=1'
-                'BACKBONE_ROUTER=1'
+            readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=0'
-                'NETWORK_MANAGER=0'
                 'NAT64=0'
                 'DNS64=0'
-                'DHCPV6_PD=0'
-                'WEB_GUI=0'
-                'REST_API=0'
-                "OTBR_OPTIONS=\"-DOT_THREAD_VERSION=1.2 -DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF -DOT_TREL=OFF -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH} -DOT_POSIX_CONFIG_RCP_BUS=${OTBR_RCP_BUS} -DOTBR_RADIO_URL=${OTBR_RADIO_URL}\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS} ${OTBR_COMMON_OPTIONS}\""
             )
+            build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
     esac
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
-            readonly BUILD_OPTIONS=(
-                'INFRA_IF_NAME=eth0'
-                'RELEASE=1'
-                'REFERENCE_DEVICE=1'
-                'BACKBONE_ROUTER=1'
+            readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=1'
-                'NETWORK_MANAGER=0'
                 'NAT64=1'
                 'DNS64=1'
-                'DHCPV6_PD=0'
-                'WEB_GUI=0'
-                'REST_API=0'
-                "OTBR_OPTIONS=\"-DOT_THREAD_VERSION=1.3 -DOT_FULL_LOGS=ON -DOT_BORDER_ROUTING=ON -DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON -DOT_SRP_CLIENT=ON -DOT_DNS_CLIENT=ON -DOT_TREL=ON -DOT_RCP_RESTORATION_MAX_COUNT=100 -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH} -DOT_POSIX_CONFIG_RCP_BUS=${OTBR_RCP_BUS} -DOTBR_RADIO_URL=${OTBR_RADIO_URL}\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS} ${OTBR_COMMON_OPTIONS} -DOT_RCP_RESTORATION_MAX_COUNT=100\""
             )
+            build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         *)
-            readonly BUILD_OPTIONS=(
-                'INFRA_IF_NAME=eth0'
-                'RELEASE=1'
-                'REFERENCE_DEVICE=1'
-                'BACKBONE_ROUTER=1'
+            readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=1'
-                'NETWORK_MANAGER=0'
                 'NAT64=1'
                 'DNS64=1'
-                'DHCPV6_PD=0'
-                'WEB_GUI=0'
-                'REST_API=0'
-                "OTBR_OPTIONS=\"-DOT_THREAD_VERSION=1.3 -DOT_FULL_LOGS=ON -DOT_BORDER_ROUTING=ON -DOTBR_DUA_ROUTING=ON -DOT_DUA=ON -DOT_MLR=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON -DOT_SRP_CLIENT=ON -DOT_DNS_CLIENT=ON -DOT_TREL=ON -DOTBR_PACKAGE_VERSION=${OT_BR_POSIX_COMMIT_HASH} -DOT_PACKAGE_VERSION=${OPENTHREAD_COMMIT_HASH} -DOT_POSIX_CONFIG_RCP_BUS=${OTBR_RCP_BUS} -DOTBR_RADIO_URL=${OTBR_RADIO_URL}\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS} ${OTBR_COMMON_OPTIONS}\""
             )
+            build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
     esac
 fi
@@ -128,7 +115,7 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-su -c "${BUILD_OPTIONS[*]} script/bootstrap" pi
+su -c "${build_options[*]} script/bootstrap" pi
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -r /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
@@ -142,7 +129,7 @@ cmake --version
 
 pip3 install zeroconf
 
-su -c "${BUILD_OPTIONS[*]} script/setup" pi || true
+su -c "${build_options[*]} script/setup" pi || true
 
 if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
     cd /home/pi/repo/
