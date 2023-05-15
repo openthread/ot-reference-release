@@ -13,6 +13,22 @@ FEATURES
 
 CHANGELOG
 ==========
+* 05/10/2023
+    * TREL and NAT64 are enabled
+    * Updated submodules
+        * openthread commitid: 6865b83d7
+        * ot-br-posix commitid: d15b080045
+        * ot-nrf528xx commitid: e801931
+
+* 01/19/2023
+    * Support for Thread 1.3.0
+    * Updated submodules
+        * openthread commitid: c6179c2
+        * ot-br-posix commitid: 22d4f4e
+        * ot-nrf528xx commitid: e6ee80b
+        * ot-efr32 commitid: 38a4446
+        * ot-commissioner commitid: 8287429
+
 * 08/18/2021 (commitid:95c5cb793, main)
     * Add efr32mg12 (brd4166a) support for Thread 1.3 builds
 
