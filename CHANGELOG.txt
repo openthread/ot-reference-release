@@ -14,7 +14,8 @@ FEATURES
 CHANGELOG
 ==========
 * 05/10/2023
-    * TREL and NAT64 are enabled
+    * Added support for REFERENCE_RELEASE_TYPE 1.3.1
+    * TREL and NAT64 are enabled in 1.3.1
     * Updated submodules
         * openthread commitid: 6865b83d7
         * ot-br-posix commitid: d15b080045

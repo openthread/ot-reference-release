@@ -57,7 +57,7 @@ readonly OTBR_THREAD_1_2_OPTIONS=(
     "-DOT_MLR=ON"
     "-DOTBR_DNSSD_DISCOVERY_PROXY=OFF"
     "-DOTBR_SRP_ADVERTISING_PROXY=OFF"
-    "-DOT_TREL=OFF"
+    "-DOTBR_TREL=OFF"
 )
 
 readonly OTBR_THREAD_1_3_OPTIONS=(
@@ -67,7 +67,22 @@ readonly OTBR_THREAD_1_3_OPTIONS=(
     "-DOT_MLR=ON"
     "-DOTBR_DNSSD_DISCOVERY_PROXY=ON"
     "-DOTBR_SRP_ADVERTISING_PROXY=ON"
-    "-DOT_TREL=ON"
+    "-DOTBR_TREL=OFF"
+    "-DOTBR_NAT64=OFF"
+    "-DOT_BORDER_ROUTING=ON"
+    "-DOT_SRP_CLIENT=ON"
+    "-DOT_DNS_CLIENT=ON"
+)
+
+readonly OTBR_THREAD_1_3_1_OPTIONS=(
+    "-DOT_THREAD_VERSION=1.3.1"
+    "-DOTBR_DUA_ROUTING=ON"
+    "-DOT_DUA=ON"
+    "-DOT_MLR=ON"
+    "-DOTBR_DNSSD_DISCOVERY_PROXY=ON"
+    "-DOTBR_SRP_ADVERTISING_PROXY=ON"
+    "-DOTBR_TREL=ON"
+    "-DOTBR_NAT64=ON"
     "-DOT_BORDER_ROUTING=ON"
     "-DOT_SRP_CLIENT=ON"
     "-DOT_DNS_CLIENT=ON"
@@ -110,9 +125,30 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
         efr32mg12)
             readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=1'
+                'NAT64=0'
+                'DNS64=0'
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100\""
+            )
+            build_options+=("${LOCAL_OPTIONS[@]}")
+            ;;
+        *)
+            readonly LOCAL_OPTIONS=(
+                'BORDER_ROUTING=1'
+                'NAT64=0'
+                'DNS64=0'
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]}\""
+            )
+            build_options+=("${LOCAL_OPTIONS[@]}")
+            ;;
+    esac
+elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3.1" ]; then
+    case "${REFERENCE_PLATFORM}" in
+        efr32mg12)
+            readonly LOCAL_OPTIONS=(
+                'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
-                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_1_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
@@ -121,7 +157,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
                 'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
-                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]}\""
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_1_OPTIONS[@]} ${OTBR_COMMON_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
