@@ -275,7 +275,7 @@ build()
                 thread_version=1.1 build_type="USB_trans" build_ot "${build_1_1_env[@]}" "$@"
                 ;;
         esac
-    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ]; then
+    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ] || [ "${REFERENCE_RELEASE_TYPE}" = "1.3.1" ]; then
         options=("${build_1_3_options_common[@]}")
 
         case "${platform}" in

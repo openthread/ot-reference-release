@@ -17,7 +17,7 @@ $ git submodule update --init --recursive
 At the root of the repository:
 
 ```
-$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3|1.3.1)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] ./script/make-reference-release.bash
 ```
 
 This will produce a reference release folder in `./build/`. The folder will be
@@ -49,7 +49,7 @@ When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following com
 - Change log
 - Quick start guide
 
-When `REFERENCE_RELEASE_TYPE` is `1.3`, reference release contains following components:
+When `REFERENCE_RELEASE_TYPE` is `1.3` or `1.3.1`, reference release contains following components:
 - Raspberry Pi image containing OTBR service with border routing feature, service registry feature and OT Commissioner
 - Firmware
 - Change log
