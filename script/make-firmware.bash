@@ -44,22 +44,6 @@ build_dir=""
 build_script_flags=()
 NRFUTIL=""
 
-readonly build_1_3_options_common=(
-    "-DOT_SRP_SERVER=ON"
-    "-DOT_ECDSA=ON"
-    "-DOT_SERVICE=ON"
-    "-DOT_DNSSD_SERVER=ON"
-    "-DOT_SRP_CLIENT=ON"
-)
-
-readonly build_1_3_options_efr32=(
-    ""
-)
-
-readonly build_1_3_options_nrf=(
-    ""
-)
-
 readonly build_1_2_options_common=(
     '-DOT_THREAD_VERSION=1.2'
     '-DOT_REFERENCE_DEVICE=ON'
@@ -79,6 +63,8 @@ readonly build_1_2_options_common=(
     '-DOT_COAP=OFF'
     '-DOT_COAPS=OFF'
     '-DOT_ECDSA=OFF'
+    "-DOT_SRP_SERVER=OFF"
+    "-DOT_SRP_CLIENT=OFF"
     '-DOT_FULL_LOGS=OFF'
     '-DOT_IP6_FRAGM=OFF'
     '-DOT_LINK_RAW=OFF'
@@ -105,6 +91,35 @@ readonly build_1_1_env_common=(
 
 readonly build_1_1_env_nrf=(
     'USB=1'
+)
+
+readonly build_1_3_options_common=(
+    "-DOT_SRP_SERVER=ON"
+    "-DOT_ECDSA=ON"
+    "-DOT_SERVICE=ON"
+    "-DOT_DNSSD_SERVER=ON"
+    "-DOT_SRP_CLIENT=ON"
+)
+
+readonly build_1_3_options_efr32=(
+    ""
+)
+
+readonly build_1_3_options_nrf=(
+    ${build_1_2_options_nrf[@]}
+)
+
+readonly build_1_3_1_options_common=(
+    "-DOT_THREAD_VERSION=1.3.1"
+    ${build_1_3_options_common[@]}
+)
+
+readonly build_1_3_1_options_efr32=(
+    ""
+)
+
+readonly build_1_3_1_options_nrf=(
+    ${build_1_3_options_nrf[@]}
 )
 
 # Args
@@ -173,8 +188,18 @@ build_ot()
 
     mkdir -p "$OUTPUT_ROOT"
 
+    local dist_apps=(
+        ot-cli-ftd
+        ot-rcp
+    )
+    if [ "${FW_TYPE}" = "CLI" ]; then
+        dist_apps=(ot-cli-ftd)
+    elif [ "${FW_TYPE}" = "RCP" ]; then
+        dist_apps=(ot-rcp)
+    fi
+
     case "${thread_version}" in
-        "1.2")
+        "1.2" | "1.3" | "1.3.1")
             # Build OpenThread 1.2
             cd "${platform_repo}"
             git clean -xfd
@@ -193,10 +218,6 @@ build_ot()
             fi
 
             # Package and distribute
-            local dist_apps=(
-                ot-cli-ftd
-                ot-rcp
-            )
             for app in "${dist_apps[@]}"; do
                 package_ot "${app}"
             done
@@ -216,10 +237,6 @@ build_ot()
             make -f examples/Makefile-"${platform}" "${options[@]}"
 
             # Package and distribute
-            local dist_apps=(
-                ot-cli-ftd
-                ot-rcp
-            )
             for app in "${dist_apps[@]}"; do
                 package_ot "${app}" "${thread_version}" output/"${platform}"/bin/"${app}"
             done
@@ -276,20 +293,26 @@ build()
                 ;;
         esac
     elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ] || [ "${REFERENCE_RELEASE_TYPE}" = "1.3.1" ]; then
-        options=("${build_1_3_options_common[@]}")
+        option_version=${REFERENCE_RELEASE_TYPE//./_}
+        option_name_common="build_${option_version}_options_common[@]"
+        options=${!option_name_common}
 
         case "${platform}" in
             nrf*)
-                options+=("${build_1_3_options_nrf[@]}")
+                option_name_nrf="build_${option_version}_options_nrf[@]"
+                options_nrf=${!option_name_nrf}
+                options+="${options_nrf[@]}"
                 platform_repo=ot-nrf528xx
 
-                thread_version=1.2 build_type="USB_trans" build_ot "${options[@]}" "$@"
+                thread_version="${REFERENCE_RELEASE_TYPE}" build_type="USB_trans" build_ot ${options[@]} "$@"
                 ;;
             efr32mg12)
-                options+=("${build_1_3_options_efr32[@]}")
+                option_name_efr32="build_${option_version}_options_efr32[@]"
+                options_efr32=${!option_name_efr32}
+                options+="${options_efr32[@]}"
                 platform_repo=ot-efr32
                 build_script_flags=("--skip-silabs-apps")
-                thread_version=1.2 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                thread_version=1.2 build_ot "-DBOARD=brd4166a" ${options[@]} "$@"
                 ;;
         esac
     else
