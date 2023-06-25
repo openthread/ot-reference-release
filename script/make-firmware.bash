@@ -312,7 +312,7 @@ build()
                 options+="${options_efr32[@]}"
                 platform_repo=ot-efr32
                 build_script_flags=("--skip-silabs-apps")
-                thread_version=1.2 build_ot "-DBOARD=brd4166a" ${options[@]} "$@"
+                thread_version="${REFERENCE_RELEASE_TYPE}" build_ot "-DBOARD=brd4166a" ${options[@]} "$@"
                 ;;
         esac
     else
