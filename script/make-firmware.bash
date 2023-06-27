@@ -295,13 +295,13 @@ build()
     elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ] || [ "${REFERENCE_RELEASE_TYPE}" = "1.3.1" ]; then
         option_version=${REFERENCE_RELEASE_TYPE//./_}
         option_name_common="build_${option_version}_options_common[@]"
-        options=${!option_name_common}
+        options=(${!option_name_common})
 
         case "${platform}" in
             nrf*)
                 option_name_nrf="build_${option_version}_options_nrf[@]"
                 options_nrf=${!option_name_nrf}
-                options+="${options_nrf[@]}"
+                options+=("${options_nrf[@]}")
                 platform_repo=ot-nrf528xx
 
                 thread_version="${REFERENCE_RELEASE_TYPE}" build_type="USB_trans" build_ot ${options[@]} "$@"
@@ -309,7 +309,7 @@ build()
             efr32mg12)
                 option_name_efr32="build_${option_version}_options_efr32[@]"
                 options_efr32=${!option_name_efr32}
-                options+="${options_efr32[@]}"
+                options+=("${options_efr32[@]}")
                 platform_repo=ot-efr32
                 build_script_flags=("--skip-silabs-apps")
                 thread_version="${REFERENCE_RELEASE_TYPE}" build_ot "-DBOARD=brd4166a" ${options[@]} "$@"
