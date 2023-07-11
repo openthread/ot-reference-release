@@ -210,7 +210,11 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     echo 'exit 0' >>/etc/rc.local
 
     # update testharness-discovery script to fix autodiscovery issue
-    sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
+    if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
+        sed -i 's/OpenThread_BR/OTNCS_BR/g' /usr/sbin/testharness-discovery
+    else
+        sed -i 's/OpenThread_BR/OTNCS13_BR/g' /usr/sbin/testharness-discovery
+    fi
 
 elif [ "${REFERENCE_PLATFORM?}" = "efr32mg12" ]; then
     # update testharness-discovery script to fix autodiscovery issue
