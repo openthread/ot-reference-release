@@ -19,7 +19,7 @@ CHANGELOG
         * ot-br-posix commitid: 790dc77
         * ot-nrf528xx commitid: 982244f
         * ot-commisioner commitid: acb3371
-
+    * Updated NCS to `4d1c577`
 * 05/26/2023
     * Updated submodules
         * openthread commitid: 6865b83d7
