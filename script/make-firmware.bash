@@ -356,7 +356,7 @@ build_ncs()
 
     cd nrf
     for variant in "${variants[@]}"; do
-        west build -d "${!variant:0:1}" -b nrf52840dongle_nrf52840 -p always "${!variant:1:1}" -- -DOVERLAY_CONFIG="${!variant:2:1}" -DDTC_OVERLAY_FILE=usb.overlay
+        west build -d "${!variant:0:1}" -b nrf52840dongle_nrf52840 -p always "${!variant:1:1}" -- -DOVERLAY_CONFIG="${!variant:2:1}"
     done
 
     package_ncs "ot-cli-ftd" "1.1"
