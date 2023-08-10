@@ -36,9 +36,8 @@ else
 fi
 
 script_dir="$(dirname "$(realpath "$script_path")")"
-repo_dir="$(dirname "$script_dir")"
+OT_REFERENCE_RELEASE="$(dirname "$script_dir")"
 
-IMAGE_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip
 echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
 echo "IN_CHINA=${IN_CHINA:=0}"
 echo "OUTPUT_ROOT=${OUTPUT_ROOT?}"
@@ -51,22 +50,22 @@ if [ "$REFERENCE_RELEASE_TYPE" != "1.2" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3
     exit 1
 fi
 
-BUILD_TARGET=raspbian-gcc
 STAGE_DIR=/tmp/raspbian
-QEMU_ROOT=${repo_dir}/mnt-rpi
-TOOLS_HOME=$HOME/.cache/tools
+QEMU_ROOT=${OT_REFERENCE_RELEASE}/mnt-rpi
+IMAGES_DIR="${IMAGES_DIR-"${HOME}/.cache/tools/images"}"
 
 cleanup()
 {
     set +e
     for pid in $(sudo lsof -t "$QEMU_ROOT"); do
-        sudo kill "$pid"
+        sudo kill -9 "$pid"
     done
 
     # Teardown QEMU machine
-    sudo "${repo_dir}"/docker-rpi-emu/scripts/qemu-cleanup.sh "$QEMU_ROOT"
-    sudo umount -f "$QEMU_ROOT"/boot
-    sudo umount -f "$QEMU_ROOT"
+    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/qemu-cleanup.sh "$QEMU_ROOT" || true
+
+    # Unmount
+    sudo umount -f -R "$QEMU_ROOT" || true
     set -e
 }
 
@@ -74,65 +73,106 @@ trap cleanup EXIT
 
 main()
 {
-    BUILD_TARGET=$BUILD_TARGET IMAGE_URL=$IMAGE_URL ./script/bootstrap.bash
+    OPENTHREAD_COMMIT_HASH=$(git -C "${OT_REFERENCE_RELEASE}"/openthread rev-parse --short HEAD)
+    OT_BR_POSIX_COMMIT_HASH=$(git -C "${OT_REFERENCE_RELEASE}"/ot-br-posix rev-parse --short HEAD)
 
-    IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
-    IMAGE_FILE="$TOOLS_HOME"/images/"$IMAGE_NAME".img
+    # Ensure qemu is installed
+    if ! command -v /usr/bin/qemu-arm-static; then
+        "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash qemu
+    fi
 
+    # Ensure OUTPUT_ROOT exists
+    mkdir -p "$OUTPUT_ROOT"
+
+    # Ensure IMAGES_DIR exists
+    [ -d "$IMAGES_DIR" ] || mkdir -p "$IMAGES_DIR"
+
+    # Download raspios image
+    RASPIOS_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip
+    IMAGE_ARCHIVE=$(basename "${RASPIOS_URL}")
+    IMAGE_FILE=$(basename "${IMAGE_ARCHIVE}" .zip).img
+    wget -q -O "$IMAGES_DIR/$IMAGE_ARCHIVE" -c "$RASPIOS_URL"
+
+    # Extract the downloaded archive
+    mime_type=$(file "$IMAGES_DIR/$IMAGE_ARCHIVE" --mime-type)
+    if [[ $mime_type == *"application/zip"* ]]; then
+        unzip -o "$IMAGES_DIR/$IMAGE_ARCHIVE" -d $IMAGES_DIR
+    elif [[ $mime_type == *"application/"* ]]; then
+        xz -f -k -d "$IMAGES_DIR/$IMAGE_ARCHIVE"
+    else
+        echo "ERROR: Unrecognized archive type\n${mime_type}"
+        exit 3
+    fi
+    ls -alh $IMAGES_DIR/$IMAGE_FILE
+
+    # Ensure STAGE_DIR exists. Create a copy of IMAGE_FILE in STAGE_DIR
     [ -d "$STAGE_DIR" ] || mkdir -p "$STAGE_DIR"
-    cp -v "$IMAGE_FILE" "$STAGE_DIR"/raspbian.img
 
-    python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
+    export STAGING_IMAGE_FILE="$STAGE_DIR/otbr.${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d).ot_${OPENTHREAD_COMMIT_HASH}.ot-br_${OT_BR_POSIX_COMMIT_HASH}.img"
+    cp "$IMAGES_DIR/$IMAGE_FILE" "$STAGING_IMAGE_FILE"
 
+    # Expand IMAGE_FILE by EXPAND_SIZE
+    # unit MB
+    EXPAND_SIZE=6144
+    dd if=/dev/zero bs=1M count=$EXPAND_SIZE >>"$STAGING_IMAGE_FILE"
+    ls -alh "$STAGING_IMAGE_FILE"
+    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/expand.sh "$STAGING_IMAGE_FILE" "$EXPAND_SIZE"
+
+    # Create mount dir
     mkdir -p "$QEMU_ROOT"
-    chown -R "$USER": "$QEMU_ROOT"
-    ls -alh "$QEMU_ROOT"
-    script/mount.bash "$STAGE_DIR"/raspbian.img "$QEMU_ROOT"
 
-    (
-        OPENTHREAD_COMMIT_HASH=$(cd "${repo_dir}"/openthread && git rev-parse --short HEAD)
-        OT_BR_POSIX_COMMIT_HASH=$(cd "${repo_dir}"/ot-br-posix && git rev-parse --short HEAD)
-        cd docker-rpi-emu/scripts
-        sudo mount --bind /dev/pts "$QEMU_ROOT"/dev/pts
+    # Mount .img
+    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/mount.sh "$STAGING_IMAGE_FILE" $QEMU_ROOT
 
-        # Mount /etc/resolv.conf
-        if [ -f "/etc/resolv.conf" ]; then
-            sudo mount -o ro,bind /etc/resolv.conf "$QEMU_ROOT"/etc/resolv.conf
-        fi
+    # Mount /etc/resolv.conf
+    if [ -f "/etc/resolv.conf" ]; then
+        sudo mount -o ro,bind /etc/resolv.conf "$QEMU_ROOT"/etc/resolv.conf
+    fi
 
-        sudo mkdir -p "$QEMU_ROOT"/home/pi/repo
-        sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$QEMU_ROOT"/home/pi/repo
-        sudo ./qemu-setup.sh "$QEMU_ROOT"
-        sudo chroot "$QEMU_ROOT" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}" "${OTBR_RCP_BUS}" "${OTBR_RADIO_URL}"
-        sudo chroot "$QEMU_ROOT" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
-        echo "enable_uart=1" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
-        echo "dtoverlay=disable-bt" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
-        if [[ ${OTBR_RCP_BUS} == "SPI" ]]; then
-            echo "dtparam=spi=on" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
-        fi
-        sudo touch "$QEMU_ROOT"/boot/ssh && sync && sleep 1
-        sudo ./qemu-cleanup.sh "$QEMU_ROOT"
-        LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
-        sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
-        sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
-        if [[ ! -f /usr/bin/pishrink.sh ]]; then
-            sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
-        fi
-        set +e
-        sudo /usr/bin/pishrink.sh $STAGE_DIR/otbr.img
-        ret_val=$?
-        # Ignore error when pishrink can't shrink the image any further
-        if [[ $ret_val -ne 11 ]] && [[ $ret_val -ne 0 ]]; then
-            exit $ret_val
-        fi
-        set -e
-        if [[ -n ${SD_CARD:=} ]]; then
-            sudo sh -c "dcfldd if=$STAGE_DIR/otbr.img of=$SD_CARD bs=1m && sync"
-        fi
-        IMG_ZIP_FILE="otbr.${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d).ot_${OPENTHREAD_COMMIT_HASH}.ot-br_${OT_BR_POSIX_COMMIT_HASH}.img.zip"
-        (cd $STAGE_DIR && zip "$IMG_ZIP_FILE" otbr.img && mv "$IMG_ZIP_FILE" "$OUTPUT_ROOT")
+    # Start RPi QEMU machine
+    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/qemu-setup.sh "$QEMU_ROOT"
 
-    )
+    # Ensure git_archive_all is installed
+    if ! python3 -m pip show git_archive_all; then
+        "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash python
+    fi
+
+    # Copy ot-reference-release repo into QEMU_ROOT
+    python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
+    sudo mkdir -p "$QEMU_ROOT"/home/pi/repo
+    sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$QEMU_ROOT"/home/pi/repo
+
+    # Run OTBR install
+    sudo chroot "$QEMU_ROOT" /bin/bash -c "export DOCKER=${DOCKER-0}; /home/pi/repo/script/otbr-setup.bash ${REFERENCE_RELEASE_TYPE?} $IN_CHINA ${REFERENCE_PLATFORM?} ${OPENTHREAD_COMMIT_HASH} ${OT_BR_POSIX_COMMIT_HASH} ${OTBR_RCP_BUS} ${OTBR_RADIO_URL}"
+    sudo chroot "$QEMU_ROOT" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
+    echo "enable_uart=1" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
+    echo "dtoverlay=disable-bt" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
+    if [[ ${OTBR_RCP_BUS} == "SPI" ]]; then
+        echo "dtparam=spi=on" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
+    fi
+    sudo touch "$QEMU_ROOT"/boot/ssh && sync && sleep 1
+
+    # Shrink .img
+    if [[ ! -f /usr/bin/pishrink.sh ]]; then
+        sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
+    fi
+    set +e
+    sudo /usr/bin/pishrink.sh "$STAGING_IMAGE_FILE"
+    ret_val=$?
+    # Ignore error when pishrink can't shrink the image any further
+    if [[ $ret_val -ne 11 ]] && [[ $ret_val -ne 0 ]]; then
+        exit $ret_val
+    fi
+    set -e
+
+    # Write .img to SD Card
+    if [[ -n ${SD_CARD:=} ]]; then
+        sudo sh -c "dcfldd if="$STAGING_IMAGE_FILE" of=$SD_CARD bs=1m && sync"
+    fi
+
+    # Compress .img and move archive to OUTPUT_ROOT
+    IMG_ZIP_FILE="$(basename "$STAGING_IMAGE_FILE").zip"
+    zip -j "$OUTPUT_ROOT/$IMG_ZIP_FILE" "$STAGING_IMAGE_FILE"
 }
 
 main "$@"
