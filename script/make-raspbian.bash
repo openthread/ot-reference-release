@@ -59,15 +59,14 @@ TOOLS_HOME=$HOME/.cache/tools
 cleanup()
 {
     set +e
-
-    # Unmount and detach any loop devices
-    loop_names=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
-    for loop in ${loop_names}; do
-        sudo umount -lf "${loop}p1"
-        sudo umount -lf "${loop}p2"
-        sudo losetup -d "${loop}"
+    for pid in $(sudo lsof -t "$QEMU_ROOT"); do
+        sudo kill "$pid"
     done
 
+    # Teardown QEMU machine
+    sudo "${repo_dir}"/docker-rpi-emu/scripts/qemu-cleanup.sh "$QEMU_ROOT"
+    sudo umount -f "$QEMU_ROOT"/boot
+    sudo umount -f "$QEMU_ROOT"
     set -e
 }
 
@@ -95,6 +94,12 @@ main()
         OT_BR_POSIX_COMMIT_HASH=$(cd "${repo_dir}"/ot-br-posix && git rev-parse --short HEAD)
         cd docker-rpi-emu/scripts
         sudo mount --bind /dev/pts "$QEMU_ROOT"/dev/pts
+
+        # Mount /etc/resolv.conf
+        if [ -f "/etc/resolv.conf" ]; then
+            sudo mount -o ro,bind /etc/resolv.conf "$QEMU_ROOT"/etc/resolv.conf
+        fi
+
         sudo mkdir -p "$QEMU_ROOT"/home/pi/repo
         sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$QEMU_ROOT"/home/pi/repo
         sudo ./qemu-setup.sh "$QEMU_ROOT"
