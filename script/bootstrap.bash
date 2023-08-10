@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2021, The OpenThread Authors.
+#  Copyright (c) 2023, The OpenThread Authors.
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,113 +29,120 @@
 
 set -euxo pipefail
 
-TOOLS_HOME="$HOME"/.cache/tools
-[[ -d $TOOLS_HOME ]] || mkdir -p "$TOOLS_HOME"
+# ==============================================================================
+# Bash definitions
 
-disable_install_recommends()
+if [[ -n ${BASH_SOURCE[0]} ]]; then
+    script_path="${BASH_SOURCE[0]}"
+else
+    script_path="$0"
+fi
+script_dir="$(realpath "$(dirname "${script_path}")")"
+repo_dir="$(dirname "${script_dir}")"
+
+# ==============================================================================
+
+install_packages_apt()
 {
-    OTBR_APT_CONF_FILE=/etc/apt/apt.conf
+    echo 'Installing apt dependencies...'
 
-    if [[ -f ${OTBR_APT_CONF_FILE} ]] && grep Install-Recommends "${OTBR_APT_CONF_FILE}"; then
-        return 0
+    # apt-get update and install dependencies
+    sudo apt-get update
+    sudo apt-get --no-install-recommends install -y \
+        parted \
+        fdisk \
+        git \
+        wget \
+        file \
+        xz-utils \
+        zip \
+        python3-pip \
+        dcfldd \
+        lsof
+}
+
+install_packages_opkg()
+{
+    echo 'opkg not supported currently' && false
+}
+
+install_packages_rpm()
+{
+    echo 'rpm not supported currently' && false
+}
+
+install_packages_brew()
+{
+    echo 'brew not supported currently' && false
+}
+
+install_packages_source()
+{
+    echo 'source not supported currently' && false
+}
+
+install_packages_pip3()
+{
+    echo 'Installing python3 dependencies...'
+    pip3 install --upgrade -r "${repo_dir}/requirements.txt"
+}
+
+install_packages()
+{
+    PM=source
+    if command -v apt-get; then
+        PM=apt
+    elif command -v rpm; then
+        PM=rpm
+    elif command -v opkg; then
+        PM=opkg
+    elif command -v brew; then
+        PM=brew
     fi
+    install_packages_$PM
 
-    sudo tee -a /etc/apt/apt.conf <<EOF
-APT::Get::Install-Recommends "false";
-APT::Get::Install-Suggests "false";
-EOF
-}
-
-install_common_dependencies()
-{
-    # Common dependencies
-    sudo apt-get install --no-install-recommends -y \
-        libdbus-1-dev \
-        ninja-build \
-        expect \
-        net-tools \
-        libboost-dev \
-        libboost-filesystem-dev \
-        libboost-system-dev \
-        libavahi-common-dev \
-        libavahi-client-dev \
-        libreadline-dev \
-        libncurses-dev \
-        libjsoncpp-dev \
-        coreutils
-}
-
-install_openthread_binaries()
-{
-    pip3 install -U cmake
-    cd third_party/openthread/repo
-    mkdir -p build && cd build
-
-    cmake .. -GNinja -DOT_PLATFORM=simulation -DOT_FULL_LOGS=1 -DOT_COMMISSIONER=ON -DOT_JOINER=ON
-    ninja
-    sudo ninja install
-
-    sudo apt-get install --no-install-recommends -y socat
+    if command -v pip3; then
+        install_packages_pip3
+    fi
 }
 
 install_qemu()
 {
     # Different versions of Linux may support qemu or qemu-system-arm.
-    # Install qemu first. If the installation of qemu fails, try install qemu-system-arm.
-
-    set +e
-    QEMU=qemu
-    sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
-    ret=$?
-    set -e
-
-    if [[ ${ret} != 0 ]]; then
+    # Search for the correct one to install
+    if apt-cache search '^qemu$' | grep -q 'qemu'; then
+        QEMU=qemu
+    elif apt-cache search '^qemu-system-arm$' | grep -q 'qemu-system-arm'; then
         QEMU=qemu-system-arm
-        sudo apt-get install --no-install-recommends --allow-unauthenticated -y $QEMU qemu-user-static binfmt-support parted dcfldd
+    else
+        echo "ERROR: Could not find 'qemu' or 'qemu-system-arm'"
+        exit 1
     fi
+
+    sudo apt-get install --no-install-recommends --allow-unauthenticated -y \
+        $QEMU \
+        qemu-user-static \
+        binfmt-support
 }
 
-configure_network()
+main()
 {
-    echo 0 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
-    echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/forwarding
-    echo 1 | sudo tee /proc/sys/net/ipv4/conf/all/forwarding
+    if [ $# == 0 ]; then
+        install_packages
+        install_qemu
+    elif [ "$1" == 'packages' ]; then
+        install_packages
+    elif [ "$1" == 'python' ]; then
+        install_packages_pip3
+    elif [ "$1" == 'qemu' ]; then
+        install_qemu
+    else
+        echo >&2 "Unsupported action: $1. Supported: packages, python, qemu"
+        # 128 for Invalid arguments
+        exit 128
+    fi
+
+    echo "Bootstrap completed successfully."
 }
 
-disable_install_recommends
-sudo apt-get update
-install_common_dependencies
-
-if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
-    SOURCE_NAME=mDNSResponder-878.30.4
-    wget https://github.com/apple-oss-distributions/mDNSResponder/archive/refs/tags/$SOURCE_NAME.tar.gz \
-        && tar xvf $SOURCE_NAME.tar.gz \
-        && cd $SOURCE_NAME/mDNSPosix \
-        && make os=linux && sudo make install os=linux
-fi
-
-install_qemu
-
-pip3 install git-archive-all
-
-# Prepare Raspbian image
-
-IMAGE_NAME=$(basename "${IMAGE_URL}" .zip)
-IMAGE_FILE="$IMAGE_NAME".img
-[ -f "$TOOLS_HOME"/images/"$IMAGE_FILE" ] || {
-    # unit MB
-    EXPAND_SIZE=6144
-
-    [ -d "$TOOLS_HOME"/images ] || mkdir -p "$TOOLS_HOME"/images
-
-    [[ -f "$IMAGE_NAME".zip ]] || curl -LO "$IMAGE_URL"
-
-    unzip "$IMAGE_NAME".zip -d /tmp
-
-    (cd /tmp \
-        && dd if=/dev/zero bs=1048576 count="$EXPAND_SIZE" >>"$IMAGE_FILE" \
-        && mv "$IMAGE_FILE" "$TOOLS_HOME"/images/"$IMAGE_FILE")
-
-    (cd docker-rpi-emu/scripts \
-        && sudo ./expand.sh "$TOOLS_HOME"/images/"$IMAGE_FILE" "$EXPAND_SIZE")
-}
+main "$@"
