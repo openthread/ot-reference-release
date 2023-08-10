@@ -53,7 +53,7 @@ fi
 
 BUILD_TARGET=raspbian-gcc
 STAGE_DIR=/tmp/raspbian
-IMAGE_DIR=${repo_dir}/mnt-rpi
+QEMU_ROOT=${repo_dir}/mnt-rpi
 TOOLS_HOME=$HOME/.cache/tools
 
 cleanup()
@@ -85,28 +85,28 @@ main()
 
     python3 -m git_archive_all "$STAGE_DIR"/repo.tar.gz
 
-    mkdir -p "$IMAGE_DIR"
-    chown -R "$USER": "$IMAGE_DIR"
-    ls -alh "$IMAGE_DIR"
-    script/mount.bash "$STAGE_DIR"/raspbian.img "$IMAGE_DIR"
+    mkdir -p "$QEMU_ROOT"
+    chown -R "$USER": "$QEMU_ROOT"
+    ls -alh "$QEMU_ROOT"
+    script/mount.bash "$STAGE_DIR"/raspbian.img "$QEMU_ROOT"
 
     (
         OPENTHREAD_COMMIT_HASH=$(cd "${repo_dir}"/openthread && git rev-parse --short HEAD)
         OT_BR_POSIX_COMMIT_HASH=$(cd "${repo_dir}"/ot-br-posix && git rev-parse --short HEAD)
         cd docker-rpi-emu/scripts
-        sudo mount --bind /dev/pts "$IMAGE_DIR"/dev/pts
-        sudo mkdir -p "$IMAGE_DIR"/home/pi/repo
-        sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$IMAGE_DIR"/home/pi/repo
-        sudo ./qemu-setup.sh "$IMAGE_DIR"
-        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}" "${OTBR_RCP_BUS}" "${OTBR_RADIO_URL}"
-        sudo chroot "$IMAGE_DIR" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
-        echo "enable_uart=1" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
-        echo "dtoverlay=disable-bt" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+        sudo mount --bind /dev/pts "$QEMU_ROOT"/dev/pts
+        sudo mkdir -p "$QEMU_ROOT"/home/pi/repo
+        sudo tar xzf "$STAGE_DIR"/repo.tar.gz --absolute-names --strip-components 1 -C "$QEMU_ROOT"/home/pi/repo
+        sudo ./qemu-setup.sh "$QEMU_ROOT"
+        sudo chroot "$QEMU_ROOT" /bin/bash /home/pi/repo/script/otbr-setup.bash "${REFERENCE_RELEASE_TYPE?}" "$IN_CHINA" "${REFERENCE_PLATFORM?}" "${OPENTHREAD_COMMIT_HASH}" "${OT_BR_POSIX_COMMIT_HASH}" "${OTBR_RCP_BUS}" "${OTBR_RADIO_URL}"
+        sudo chroot "$QEMU_ROOT" /bin/bash /home/pi/repo/script/otbr-cleanup.bash
+        echo "enable_uart=1" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
+        echo "dtoverlay=disable-bt" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
         if [[ ${OTBR_RCP_BUS} == "SPI" ]]; then
-            echo "dtparam=spi=on" | sudo tee -a "$IMAGE_DIR"/boot/config.txt
+            echo "dtparam=spi=on" | sudo tee -a "$QEMU_ROOT"/boot/config.txt
         fi
-        sudo touch "$IMAGE_DIR"/boot/ssh && sync && sleep 1
-        sudo ./qemu-cleanup.sh "$IMAGE_DIR"
+        sudo touch "$QEMU_ROOT"/boot/ssh && sync && sleep 1
+        sudo ./qemu-cleanup.sh "$QEMU_ROOT"
         LOOP_NAME=$(losetup -j $STAGE_DIR/raspbian.img --output NAME -n)
         sudo sh -c "dcfldd of=$STAGE_DIR/otbr.img if=$LOOP_NAME bs=1m && sync"
         sudo cp $STAGE_DIR/otbr.img $STAGE_DIR/otbr_original.img
