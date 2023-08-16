@@ -17,11 +17,11 @@ $ git submodule update --init --recursive
 At the root of the repository:
 
 ```
-$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3|1.3.1)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3|1.3.1) [REFERENCE_TYPE=(OTBR|CLI)] [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] ./script/make-reference-release.bash
 ```
 
 This will produce a reference release folder in `./build/`. The folder will be
-named after the release type, date and the OpenThread commit id.
+named after the release type, date and the OpenThread/ot-br-posix commit id.
 
 `SD_CARD` is expected to be the device file path of an SD card inserted to
 the host. If this variable is specified, the script will flash the Raspberry Pi
@@ -54,6 +54,8 @@ When `REFERENCE_RELEASE_TYPE` is `1.3` or `1.3.1`, reference release contains fo
 - Firmware
 - Change log
 - Quick start guide
+
+With `REFERENCE_TYPE` it's possible to only generate the specified type of reference release. If set to `CLI`, only CLI firmware for hardware type specified by `REFERENCE_PLATFORM` is generated. If set to `OTBR`, only OTBR reference release which contains Raspberry Pi image and a RCP firmware will be generated. If this variable is not specified, all types of reference releases are generated.
 
 **Note**: Currently, only the following boards are supported for CLI/RCP firmwares:
 

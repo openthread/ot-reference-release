@@ -36,29 +36,39 @@ main()
     # ==========================================================================
     echo "REFERENCE_RELEASE_TYPE=${REFERENCE_RELEASE_TYPE?}"
     mkdir -p build
-    OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)")
+    OUTPUT_ROOT=$(realpath build/ot-"${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d)-$(cd openthread && git rev-parse --short HEAD)-$(cd ot-br-posix && git rev-parse --short HEAD)")
     mkdir -p "$OUTPUT_ROOT"
+    echo "REFERENCE_TYPE=${REFERENCE_TYPE:=ALL}"
 
-    # ==========================================================================
-    # Build firmware
-    # ==========================================================================
-    if [ "${REFERENCE_PLATFORM}" != "none" ]; then
-        OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
+    if [ "${REFERENCE_TYPE}" = "ALL" ] || [ "${REFERENCE_TYPE}" = "CLI" ]; then
+        # ==========================================================================
+        # Build CLI firmware
+        # ==========================================================================
+        OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ FW_TYPE="CLI" ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
     fi
 
-    # ==========================================================================
-    # Build THCI
-    # ==========================================================================
-    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
-        mkdir -p "$OUTPUT_ROOT"/thci
-        OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
-    fi
+    if [ "${REFERENCE_TYPE}" = "ALL" ] || [ "${REFERENCE_TYPE}" = "OTBR" ]; then
+        # ==========================================================================
+        # Build RCP firmware
+        # ==========================================================================
+        if [ "${REFERENCE_PLATFORM}" != "none" ]; then
+            OUTPUT_ROOT="$OUTPUT_ROOT"/fw_dongle_${REFERENCE_PLATFORM}/ FW_TYPE="RCP" ./script/make-firmware.bash "${REFERENCE_PLATFORM}"
+        fi
 
-    # ==========================================================================
-    # Build raspbian
-    # ==========================================================================
-    mkdir -p "$OUTPUT_ROOT"
-    OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
+        # ==========================================================================
+        # Build THCI
+        # ==========================================================================
+        if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
+            mkdir -p "$OUTPUT_ROOT"/thci
+            OUTPUT_ROOT="$OUTPUT_ROOT"/thci/ ./script/make-thci.bash
+        fi
+
+        # ==========================================================================
+        # Build raspbian
+        # ==========================================================================
+        mkdir -p "$OUTPUT_ROOT"
+        OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
+    fi
 
     # ==========================================================================
     # Package docs
