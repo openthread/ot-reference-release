@@ -189,7 +189,7 @@ cmake --version
 
 pip3 install zeroconf
 
-su -c "${build_options[*]} script/setup" pi || true
+su -c "${build_options[*]} script/setup" pi
 
 if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
     cd /home/pi/repo/
