@@ -82,6 +82,7 @@ readonly OTBR_THREAD_1_3_1_OPTIONS=(
     "-DOT_THREAD_VERSION=1.3.1"
     "-DOTBR_TREL=ON"
     "-DOTBR_NAT64=ON"
+    "-DOTBR_BORDER_ROUTING_DHCP6_PD=ON"
 )
 
 build_options=(
@@ -175,7 +176,7 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-su -c "${build_options[*]} script/bootstrap" pi
+su -c "DOCKER=1 ${build_options[*]} script/bootstrap" pi
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -r /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo

@@ -181,7 +181,10 @@ build_ot()
 
             # Use OpenThread from top-level of repo
             rm -rf openthread
-            ln -s ../openthread .
+            # git_archive_all doesn't accept symbolic link, so make a copy of openthread and make
+            # it not a submodule
+            cp -r ../openthread .
+            rm openthread/.git
 
             # Build
             build_dir=${OT_CMAKE_BUILD_DIR:-"${repo_dir}"/build-"${thread_version}"/"${platform}"}
