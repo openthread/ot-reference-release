@@ -82,7 +82,7 @@ readonly build_1_2_options_common=(
     '-DOT_FULL_LOGS=OFF'
     '-DOT_IP6_FRAGM=OFF'
     '-DOT_LINK_RAW=OFF'
-    '-DOT_MTD_NETDIAG=OFF'
+    '-DOT_NETDIAG_CLIENT=OFF'
     '-DOT_SNTP_CLIENT=OFF'
     '-DOT_UDP_FORWARD=OFF'
 )
