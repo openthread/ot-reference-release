@@ -44,7 +44,8 @@ build_dir=""
 build_script_flags=()
 NRFUTIL=""
 
-readonly build_1_3_options_common=(
+readonly build_1_4_options_common=(
+    "-DOT_THREAD_VERSION=1.4"
     "-DOT_SRP_SERVER=ON"
     "-DOT_ECDSA=ON"
     "-DOT_SERVICE=ON"
@@ -52,8 +53,17 @@ readonly build_1_3_options_common=(
     "-DOT_SRP_CLIENT=ON"
 )
 
-readonly build_1_3_options_efr32=(
+readonly build_1_4_options_nrf=(
     ""
+)
+
+readonly build_1_3_options_common=(
+    "-DOT_THREAD_VERSION=1.3"
+    "-DOT_SRP_SERVER=ON"
+    "-DOT_ECDSA=ON"
+    "-DOT_SERVICE=ON"
+    "-DOT_DNSSD_SERVER=ON"
+    "-DOT_SRP_CLIENT=ON"
 )
 
 readonly build_1_3_options_nrf=(
@@ -174,8 +184,8 @@ build_ot()
     mkdir -p "$OUTPUT_ROOT"
 
     case "${thread_version}" in
-        "1.2")
-            # Build OpenThread 1.2
+        "1.2"|"1.3"|"1.4")
+            # Build OpenThread 1.2 or 1.3 or 1.4
             cd "${platform_repo}"
             git clean -xfd
 
@@ -278,7 +288,7 @@ build()
                 thread_version=1.1 build_type="USB_trans" build_ot "${build_1_1_env[@]}" "$@"
                 ;;
         esac
-    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ] || [ "${REFERENCE_RELEASE_TYPE}" = "1.3.1" ]; then
+    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ]; then
         options=("${build_1_3_options_common[@]}")
 
         case "${platform}" in
@@ -286,13 +296,28 @@ build()
                 options+=("${build_1_3_options_nrf[@]}")
                 platform_repo=ot-nrf528xx
 
-                thread_version=1.2 build_type="USB_trans" build_ot "${options[@]}" "$@"
+                thread_version=1.3 build_type="USB_trans" build_ot "${options[@]}" "$@"
                 ;;
             efr32mg12)
-                options+=("${build_1_3_options_efr32[@]}")
                 platform_repo=ot-efr32
                 build_script_flags=("--skip-silabs-apps")
-                thread_version=1.2 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                thread_version=1.3 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                ;;
+        esac
+    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.4" ]; then
+        options=("${build_1_4_options_common[@]}")
+
+        case "${platform}" in
+            nrf*)
+                options+=("${build_1_4_options_nrf[@]}")
+                platform_repo=ot-nrf528xx
+
+                thread_version=1.4 build_type="USB_trans" build_ot "${options[@]}" "$@"
+                ;;
+            efr32mg12)
+                platform_repo=ot-efr32
+                build_script_flags=("--skip-silabs-apps")
+                thread_version=1.4 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
                 ;;
         esac
     else

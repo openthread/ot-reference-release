@@ -45,7 +45,7 @@ echo "OTBR_RCP_BUS=${OTBR_RCP_BUS:=UART}"
 echo "REFERENCE_PLATFORM=${REFERENCE_PLATFORM?}"
 echo "OTBR_RADIO_URL=${OTBR_RADIO_URL:=spinel+hdlc+uart:///dev/ttyACM0}"
 
-if [ "$REFERENCE_RELEASE_TYPE" != "1.2" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3.1" ]; then
+if [ "$REFERENCE_RELEASE_TYPE" != "1.2" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.3" ] && [ "$REFERENCE_RELEASE_TYPE" != "1.4" ]; then
     echo "Invalid reference release type: $REFERENCE_RELEASE_TYPE"
     exit 1
 fi
