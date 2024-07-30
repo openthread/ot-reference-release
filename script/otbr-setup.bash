@@ -181,11 +181,9 @@ su -c "DOCKER=1 ${build_options[*]} script/bootstrap" pi
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -r /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
 
-# Pin CMake version to 3.10.3 for issue https://github.com/openthread/ot-br-posix/issues/728.
-# For more background, see https://gitlab.kitware.com/cmake/cmake/-/issues/20568.
 apt-get purge -y cmake
 pip3 install scikit-build
-pip3 install cmake==3.10.3
+pip3 install cmake==3.20.2
 cmake --version
 
 pip3 install zeroconf
