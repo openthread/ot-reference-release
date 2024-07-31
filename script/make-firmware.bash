@@ -336,11 +336,11 @@ package_ncs()
     commit_id=$(git rev-parse --short HEAD)
     timestamp=$(date +%Y%m%d)
 
-    distribute "/tmp/ncs_cli_1_1/zephyr/zephyr.hex" "ot-cli-ftd" "1.1" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_cli_1_2/zephyr/zephyr.hex" "ot-cli-ftd" "1.2" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_rcp_1_2/zephyr/zephyr.hex" "ot-rcp" "1.2" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_cli_1_3/zephyr/zephyr.hex" "ot-cli-ftd" "1.3" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_rcp_1_3/zephyr/zephyr.hex" "ot-rcp" "1.3" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_cli_1_1/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.1" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_cli_1_2/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.2" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_rcp_1_2/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.2" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_cli_1_3/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.3" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_rcp_1_3/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.3" "${timestamp}" "${commit_id}"
 }
 
 build_ncs()
@@ -359,7 +359,7 @@ build_ncs()
 
     cd nrf
     for variant in "${variants[@]}"; do
-        west build -d "${!variant:0:1}" -b nrf52840dongle_nrf52840 -p always "${!variant:1:1}" -- -DOVERLAY_CONFIG="${!variant:2:1}"
+        west build -d "${!variant:0:1}" -b nrf52840dongle/nrf52840 -p always "${!variant:1:1}" --sysbuild -- -DOVERLAY_CONFIG="${!variant:2:1}"
     done
 
     package_ncs "ot-cli-ftd" "1.1"
