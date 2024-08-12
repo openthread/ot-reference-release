@@ -272,59 +272,6 @@ nrfutil_setup()
     fi
 }
 
-build()
-{
-    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
-        build_1_2_options=("${build_1_2_options_common[@]}")
-        build_1_1_env=("${build_1_1_env_common[@]}")
-
-        case "${platform}" in
-            nrf*)
-                build_1_2_options+=("${build_1_2_options_nrf[@]}")
-                build_1_1_env+=("${build_1_1_env_nrf[@]}")
-                platform_repo=ot-nrf528xx
-
-                thread_version=1.2 build_type="USB_trans" build_ot "${build_1_2_options[@]}" "$@"
-                thread_version=1.1 build_type="USB_trans" build_ot "${build_1_1_env[@]}" "$@"
-                ;;
-        esac
-    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ]; then
-        options=("${build_1_3_options_common[@]}")
-
-        case "${platform}" in
-            nrf*)
-                options+=("${build_1_3_options_nrf[@]}")
-                platform_repo=ot-nrf528xx
-
-                thread_version=1.3 build_type="USB_trans" build_ot "${options[@]}" "$@"
-                ;;
-            efr32mg12)
-                platform_repo=ot-efr32
-                build_script_flags=("--skip-silabs-apps")
-                thread_version=1.3 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
-                ;;
-        esac
-    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.4" ]; then
-        options=("${build_1_4_options_common[@]}")
-
-        case "${platform}" in
-            nrf*)
-                options+=("${build_1_4_options_nrf[@]}")
-                platform_repo=ot-nrf528xx
-
-                thread_version=1.4 build_type="USB_trans" build_ot "${options[@]}" "$@"
-                ;;
-            efr32mg12)
-                platform_repo=ot-efr32
-                build_script_flags=("--skip-silabs-apps")
-                thread_version=1.4 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
-                ;;
-        esac
-    else
-        die "Error: REFERENCE_RELEASE_TYPE = ${REFERENCE_RELEASE_TYPE} is unsupported"
-    fi
-}
-
 deploy_ncs()
 {
     local commit_hash
@@ -353,49 +300,103 @@ deploy_ncs()
     west config manifest.path nrf
 }
 
-package_ncs()
-{
-    # Get build info
-    local commit_id
-    local timestamp
-    commit_id=$(git rev-parse --short HEAD)
-    timestamp=$(date +%Y%m%d)
-
-    distribute "/tmp/ncs_cli_1_1/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.1" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_cli_1_2/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.2" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_rcp_1_2/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.2" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_cli_1_3/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.3" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_rcp_1_3/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.3" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_cli_1_4/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.4" "${timestamp}" "${commit_id}"
-    distribute "/tmp/ncs_rcp_1_4/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.4" "${timestamp}" "${commit_id}"
-}
-
 build_ncs()
 {
     mkdir -p "$OUTPUT_ROOT"
     deploy_ncs
-
-    # Build folder | nrf-sdk sample | Sample configuration
-    local cli_1_1=("/tmp/ncs_cli_1_1" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_1.conf")
-    local cli_1_2=("/tmp/ncs_cli_1_2" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_2.conf")
-    local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
-    local cli_1_3=("/tmp/ncs_cli_1_3" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_3.conf")
-    local rcp_1_3=("/tmp/ncs_rcp_1_3" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_3.conf")
-    local cli_1_4=("/tmp/ncs_cli_1_4" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_4.conf")
-    local rcp_1_4=("/tmp/ncs_rcp_1_4" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_4.conf")
-
-    local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@] cli_1_3[@] rcp_1_3[@] cli_1_4[@] rcp_1_4[@])
-
     cd nrf
-    for variant in "${variants[@]}"; do
-        west build -d "${!variant:0:1}" -b nrf52840dongle/nrf52840 -p always "${!variant:1:1}" --sysbuild -- -DOVERLAY_CONFIG="${!variant:2:1}"
-    done
 
-    package_ncs "ot-cli-ftd" "1.1"
-    package_ncs "ot-cli-ftd" "1.2"
-    package_ncs "ot-rcp" "1.2"
-    package_ncs "ot-cli-ftd" "1.3"
-    package_ncs "ot-rcp" "1.3"
+    thread_version=${thread_version?}
+    local timestamp=$(date +%Y%m%d)
+    local commit_id=$(git rev-parse --short HEAD)
+
+    # variant is a list of entries: "app:sample_name"
+    local variants
+    case "${thread_version}" in
+        1.1)
+            variants=("ot-cli-ftd:cli")
+            ;;
+        *)
+            variants=("ot-cli-ftd:cli" "ot-rcp:coprocessor")
+            ;;
+
+    esac
+
+    for variant in "${variants[@]}"; do
+        local app=$(echo $variant | cut -d':' -f1)
+        local sample_name=$(echo $variant | cut -d':' -f2)
+        local sample_path="samples/openthread/${sample_name}"
+        local sample_config="${script_dir}/../config/ncs/overlay-${app}-${thread_version}.conf"
+        local build_path="/tmp/ncs_${app}_${thread_version}"
+        local hex_path="${build_path}/${sample_name}/zephyr/zephyr.hex"
+
+        west build -d "${build_path}" -b nrf52840dongle/nrf52840 -p always "${sample_path}" --sysbuild -- -DOVERLAY_CONFIG="${sample_config}"
+
+        distribute "${hex_path}" "${app}" "${thread_version}" "${timestamp}" "${commit_id}"
+    done
+}
+
+build()
+{
+    if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
+        build_1_2_options=("${build_1_2_options_common[@]}")
+        build_1_1_env=("${build_1_1_env_common[@]}")
+
+        case "${platform}" in
+            nrf*)
+                build_1_2_options+=("${build_1_2_options_nrf[@]}")
+                build_1_1_env+=("${build_1_1_env_nrf[@]}")
+                platform_repo=ot-nrf528xx
+
+                thread_version=1.2 build_type="USB_trans" build_ot "${build_1_2_options[@]}" "$@"
+                thread_version=1.1 build_type="USB_trans" build_ot "${build_1_1_env[@]}" "$@"
+                ;;
+            ncs)
+                thread_version=1.2 build_ncs
+                thread_version=1.1 build_ncs
+                ;;
+        esac
+    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.3" ]; then
+        options=("${build_1_3_options_common[@]}")
+
+        case "${platform}" in
+            nrf*)
+                options+=("${build_1_3_options_nrf[@]}")
+                platform_repo=ot-nrf528xx
+
+                thread_version=1.3 build_type="USB_trans" build_ot "${options[@]}" "$@"
+                ;;
+            efr32mg12)
+                platform_repo=ot-efr32
+                build_script_flags=("--skip-silabs-apps")
+                thread_version=1.3 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                ;;
+            ncs)
+                thread_version=1.3 build_ncs
+                ;;
+        esac
+    elif [ "${REFERENCE_RELEASE_TYPE}" = "1.4" ]; then
+        options=("${build_1_4_options_common[@]}")
+
+        case "${platform}" in
+            nrf*)
+                options+=("${build_1_4_options_nrf[@]}")
+                platform_repo=ot-nrf528xx
+
+                thread_version=1.4 build_type="USB_trans" build_ot "${options[@]}" "$@"
+                ;;
+            efr32mg12)
+                platform_repo=ot-efr32
+                build_script_flags=("--skip-silabs-apps")
+                thread_version=1.4 build_ot "-DBOARD=brd4166a" "${options[@]}" "$@"
+                ;;
+            ncs)
+                thread_version=1.4 build_ncs
+                ;;
+        esac
+    else
+        die "Error: REFERENCE_RELEASE_TYPE = ${REFERENCE_RELEASE_TYPE} is unsupported"
+    fi
 }
 
 main()
@@ -426,14 +427,8 @@ main()
                 nrfutil_setup
                 ;;
         esac
-        case "${platform}" in
-            ncs*)
-                build_ncs
-                ;;
-            *)
-                build "$@"
-                ;;
-        esac
+
+        build "$@"
     done
 
 }
