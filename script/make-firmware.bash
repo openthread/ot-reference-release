@@ -341,6 +341,8 @@ package_ncs()
     distribute "/tmp/ncs_rcp_1_2/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.2" "${timestamp}" "${commit_id}"
     distribute "/tmp/ncs_cli_1_3/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.3" "${timestamp}" "${commit_id}"
     distribute "/tmp/ncs_rcp_1_3/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.3" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_cli_1_4/cli/zephyr/zephyr.hex" "ot-cli-ftd" "1.4" "${timestamp}" "${commit_id}"
+    distribute "/tmp/ncs_rcp_1_4/coprocessor/zephyr/zephyr.hex" "ot-rcp" "1.4" "${timestamp}" "${commit_id}"
 }
 
 build_ncs()
@@ -354,8 +356,10 @@ build_ncs()
     local rcp_1_2=("/tmp/ncs_rcp_1_2" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_2.conf")
     local cli_1_3=("/tmp/ncs_cli_1_3" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_3.conf")
     local rcp_1_3=("/tmp/ncs_rcp_1_3" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_3.conf")
+    local cli_1_4=("/tmp/ncs_cli_1_4" "samples/openthread/cli/" "${script_dir}/../config/ncs/overlay-cli-1_4.conf")
+    local rcp_1_4=("/tmp/ncs_rcp_1_4" "samples/openthread/coprocessor/" "${script_dir}/../config/ncs/overlay-rcp-1_4.conf")
 
-    local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@] cli_1_3[@] rcp_1_3[@])
+    local variants=(cli_1_1[@] cli_1_2[@] rcp_1_2[@] cli_1_3[@] rcp_1_3[@] cli_1_4[@] rcp_1_4[@])
 
     cd nrf
     for variant in "${variants[@]}"; do
