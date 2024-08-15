@@ -37,10 +37,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Remove unnecessary files
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
       - name: Bootstrap
         run: |
           cd /tmp
