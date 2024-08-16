@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 08/15/2024
+    * Updated submodules
+        * openthread commitid: 5edc367
+        * ot-br-posix commitid: b66cabf
+        * ot-nrf528xx commitid: c9b9974
+
 * 08/13/2024
     * Updated NCS to `3203d13`
 
