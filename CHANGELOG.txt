@@ -13,6 +13,9 @@ FEATURES
 
 CHANGELOG
 ==========
+* 08/26/2024
+    * Updated NCS to `887bdfc`
+
 * 08/15/2024
     * Updated submodules
         * openthread commitid: 5edc367
