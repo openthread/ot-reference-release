@@ -191,7 +191,7 @@ apt-get install -y --no-install-recommends git python3-pip
 su -c "DOCKER=1 ${build_options[*]} script/bootstrap" pi
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
-cp -r /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
+cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
 
 apt-get purge -y cmake
 pip3 install scikit-build
