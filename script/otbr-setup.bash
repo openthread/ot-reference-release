@@ -157,6 +157,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
                 'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
+                'DHCPV6_PD_REF=1'
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
@@ -166,6 +167,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
                 'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
+                'DHCPV6_PD_REF=1'
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
