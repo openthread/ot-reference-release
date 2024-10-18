@@ -193,7 +193,7 @@ build_ot()
             rm -rf openthread
             # git_archive_all doesn't accept symbolic link, so make a copy of openthread and make
             # it not a submodule
-            cp -r ../openthread .
+            cp -rp ../openthread .
             rm openthread/.git
 
             # Build
