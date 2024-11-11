@@ -202,6 +202,9 @@ cmake --version
 
 pip3 install zeroconf
 
+apt-get install -y --no-install-recommends libgirepository1.0-dev
+pip3 install dbus-python PyGObject
+
 su -c "${build_options[*]} script/setup" pi
 
 if [[ "$REFERENCE_RELEASE_TYPE" = "1.2" || "$REFERENCE_RELEASE_TYPE" = "1.3" || "$REFERENCE_RELEASE_TYPE" = "1.4" ]]; then
