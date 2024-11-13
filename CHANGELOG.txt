@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 11/15/2024
+    * Updated submodules
+        * openthread commitid: 0551005
+        * ot-br-posix commitid: b041fa5
+        * ot-nrf528xx commitid: 39ac3d1
+
 * 11/08/2024
     * Updated submodules
         * openthread commitid: 0fb1c22
