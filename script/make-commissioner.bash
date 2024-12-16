@@ -31,10 +31,6 @@ set -euxo pipefail
 
 cd ot-commissioner
 
-wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
-sudo python2 get-pip.py
-
-pip2 install -r tools/commissioner_thci/requirements.txt
 ./script/bootstrap.sh || true
 
 mkdir -p build

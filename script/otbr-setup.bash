@@ -178,9 +178,9 @@ fi
 configure_apt_source()
 {
     if [ "$IN_CHINA" = 1 ]; then
-        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi
-deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi' | sudo tee /etc/apt/sources.list
-        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bookworm main non-free contrib rpi
+deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bookworm main non-free contrib rpi' | sudo tee /etc/apt/sources.list
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ bookworm main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
     fi
 }
 configure_apt_source
@@ -189,13 +189,16 @@ echo "127.0.0.1 $(hostname)" >>/etc/hosts
 chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
-apt-get install -y --no-install-recommends git python3-pip
+apt-get install -y --no-install-recommends git python3-pip python3-venv
 su -c "DOCKER=1 ${build_options[*]} script/bootstrap" pi
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
 
 apt-get purge -y cmake
+
+python3 -m venv /home/pi/.venv
+source /home/pi/.venv/bin/activate
 pip3 install scikit-build
 pip3 install cmake==3.20.2
 cmake --version
