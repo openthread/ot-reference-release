@@ -157,7 +157,6 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
                 'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
-                'DHCPV6_PD_REF=1'
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
@@ -167,7 +166,6 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
                 'BORDER_ROUTING=1'
                 'NAT64=1'
                 'DNS64=1'
-                'DHCPV6_PD_REF=1'
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
@@ -197,16 +195,15 @@ cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread
 
 apt-get purge -y cmake
 
-python3 -m venv /home/pi/.venv
-source /home/pi/.venv/bin/activate
+python3 -m venv /home/pi/.python3_venv
+source /home/pi/.python3_venv/bin/activate
+
 pip3 install scikit-build
 pip3 install cmake==3.20.2
 cmake --version
 
 pip3 install zeroconf
-
-apt-get install -y --no-install-recommends libgirepository1.0-dev
-pip3 install dbus-python PyGObject
+apt-get install -y --no-install-recommends python3-gi python3-dbus
 
 su -c "${build_options[*]} script/setup" pi
 
@@ -228,7 +225,6 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     # add calling of link_dongle.py script at startup to update symlink to the dongle
     sudo touch /etc/rc.local
     sudo chmod +x /etc/rc.local
-
     sed -i '/exit 0/d' /etc/rc.local
     grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
     echo 'exit 0' >>/etc/rc.local
@@ -245,4 +241,5 @@ elif [ "${REFERENCE_PLATFORM?}" = "efr32mg12" ]; then
     sed -i "s/OpenThread_BR/OTS${REFERENCE_RELEASE_TYPE//./}_BR/g" /usr/sbin/testharness-discovery
 fi
 
+deactivate # deactivate the virtual python environment /home/pi/.python3_venv
 sync
