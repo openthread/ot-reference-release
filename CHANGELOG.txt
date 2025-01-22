@@ -14,7 +14,7 @@ FEATURES
 CHANGELOG
 ==========
 * 01/21/2025
-    * Disable pd daemon to fix mDNS disruption
+    * Disable PD daemon to fix mDNS disruption
     * Updated submodules
         * openthread commitid: f6cee79
         * ot-br-posix commitid: b574b6c
