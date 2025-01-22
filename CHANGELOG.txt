@@ -13,6 +13,13 @@ FEATURES
 
 CHANGELOG
 ==========
+* 01/21/2025
+    * Disable PD daemon to fix mDNS disruption
+    * Updated submodules
+        * openthread commitid: f6cee79
+        * ot-br-posix commitid: b574b6c
+        * ot-nrf528xx commitid: 6586034
+
 * 11/26/2024
     * Updated submodules
         * openthread commitid: 147de7e
