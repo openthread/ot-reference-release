@@ -326,7 +326,8 @@ build_ncs()
         local app=$(echo $variant | cut -d':' -f1)
         local sample_name=$(echo $variant | cut -d':' -f2)
         local sample_path="samples/openthread/${sample_name}"
-        local sample_config="${script_dir}/../config/ncs/overlay-${app}-${thread_version}.conf"
+        local sample_config_path="${script_dir}/../config/ncs/overlay"
+        local sample_config="${sample_config_path}-common.conf;${sample_config_path}-${app}-common.conf;${sample_config_path}-${app}-${thread_version}.conf"
         local build_path="/tmp/ncs_${app}_${thread_version}"
         local hex_path="${build_path}/${sample_name}/zephyr/zephyr.hex"
 
