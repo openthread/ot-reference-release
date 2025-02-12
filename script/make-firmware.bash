@@ -255,16 +255,20 @@ nrfutil_setup()
 {
     # Setup nrfutil
     if [[ $OSTYPE == "linux"* ]]; then
-        ostype=linux
+        ostype=unknown-linux-gnu
+        arch=x86_64
     elif [[ $OSTYPE == "darwin"* ]]; then
-        ostype=mac
+        ostype=apple-darwin
+        arch=$(uname -m)
     fi
-    NRFUTIL=/tmp/nrfutil-${ostype}
+    NRFUTIL=/tmp/nrfutil-${ostype}-${arch}
 
     if [ ! -f $NRFUTIL ]; then
-        wget -O $NRFUTIL https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1.2/nrfutil-${ostype}
+        wget -O $NRFUTIL https://files.nordicsemi.com/ui/api/v1/download?repoKey=swtools\&path=external/nrfutil/executables/${arch}-${ostype}/nrfutil
         chmod +x $NRFUTIL
     fi
+
+    $NRFUTIL install nrf5sdk-tools
 
     # Generate private key
     if [ ! -f /tmp/private.pem ]; then

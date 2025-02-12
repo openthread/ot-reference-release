@@ -1,0 +1,12 @@
+intelhex
+click
+crcmod
+ecdsa
+libusb1==1.9.3
+piccata
+protobuf==3.17.3
+pyserial
+pyspinel
+pyyaml
+tqdm
+pc_ble_driver_py
