@@ -255,16 +255,20 @@ nrfutil_setup()
 {
     # Setup nrfutil
     if [[ $OSTYPE == "linux"* ]]; then
-        ostype=linux
+        ostype=unknown-linux-gnu
+        arch=x86_64
     elif [[ $OSTYPE == "darwin"* ]]; then
-        ostype=mac
+        ostype=apple-darwin
+        arch=$(uname -m)
     fi
-    NRFUTIL=/tmp/nrfutil-${ostype}
+    NRFUTIL=/tmp/nrfutil-${ostype}-${arch}
 
     if [ ! -f $NRFUTIL ]; then
-        wget -O $NRFUTIL https://github.com/NordicSemiconductor/pc-nrfutil/releases/download/v6.1.2/nrfutil-${ostype}
+        wget -O $NRFUTIL https://files.nordicsemi.com/ui/api/v1/download?repoKey=swtools\&path=external/nrfutil/executables/${arch}-${ostype}/nrfutil
         chmod +x $NRFUTIL
     fi
+
+    $NRFUTIL install nrf5sdk-tools
 
     # Generate private key
     if [ ! -f /tmp/private.pem ]; then
@@ -326,7 +330,8 @@ build_ncs()
         local app=$(echo $variant | cut -d':' -f1)
         local sample_name=$(echo $variant | cut -d':' -f2)
         local sample_path="samples/openthread/${sample_name}"
-        local sample_config="${script_dir}/../config/ncs/overlay-${app}-${thread_version}.conf"
+        local sample_config_path="${script_dir}/../config/ncs/overlay"
+        local sample_config="${sample_config_path}-common.conf;${sample_config_path}-${app}-common.conf;${sample_config_path}-${app}-${thread_version}.conf"
         local build_path="/tmp/ncs_${app}_${thread_version}"
         local hex_path="${build_path}/${sample_name}/zephyr/zephyr.hex"
 
