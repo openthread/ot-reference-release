@@ -4,7 +4,7 @@ crcmod
 ecdsa
 libusb1==1.9.3
 piccata
-protobuf==3.17.3
+protobuf==3.18.3
 pyserial
 pyspinel
 pyyaml
