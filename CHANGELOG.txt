@@ -13,6 +13,13 @@ FEATURES
 
 CHANGELOG
 ==========
+* 03/05/2025
+    * Fix for deprecation of expired DHCPv6 lease prefixes 
+    * Updated submodules
+        * openthread commitid: b1ca77a
+        * ot-br-posix commitid: 6b9a12e
+        * ot-nrf528xx commitid: b1b8548
+
 * 01/21/2025
     * Disable PD daemon to fix mDNS disruption
     * Updated submodules
