@@ -119,6 +119,15 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
+        ncs)
+            readonly LOCAL_OPTIONS=(
+                'BORDER_ROUTING=0'
+                'NAT64=0'
+                'DNS64=0'
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
+            )
+            build_options+=("${LOCAL_OPTIONS[@]}")
+            ;;
         *)
             readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=0'
@@ -140,6 +149,15 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
+        ncs)
+            readonly LOCAL_OPTIONS=(
+                'BORDER_ROUTING=1'
+                'NAT64=0'
+                'DNS64=0'
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
+            )
+            build_options+=("${LOCAL_OPTIONS[@]}")
+            ;;
         *)
             readonly LOCAL_OPTIONS=(
                 'BORDER_ROUTING=1'
@@ -158,6 +176,16 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
                 'NAT64=1'
                 'DNS64=1'
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
+            )
+            build_options+=("${LOCAL_OPTIONS[@]}")
+            ;;
+        ncs)
+            readonly LOCAL_OPTIONS=(
+                'BORDER_ROUTING=1'
+                'NAT64=1'
+                'DNS64=1'
+                'DHCPV6_PD_REF=1'
+                "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
@@ -214,6 +242,9 @@ fi
 
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
+    pip3 install -r /home/pi/repo/config/ncs/requirements-nrfutil.txt
+    pip3 install --no-dependencies nrfutil==6.0.1
+    
     apt-get install -y --no-install-recommends vim
 
     wget https://project-downloads.drogon.net/wiringpi-latest.deb
