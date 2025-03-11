@@ -31,16 +31,13 @@ set -euxo pipefail
 
 cd ot-commissioner
 
-wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
-sudo python2 get-pip.py
-
-pip2 install -r tools/commissioner_thci/requirements.txt
+pip3 install -r tools/commissioner_thci/requirements.txt
 ./script/bootstrap.sh || true
 
 mkdir -p build
 cd build
 
-/usr/local/bin/cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DOT_COMM_REFERENCE_DEVICE=ON ..
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DOT_COMM_REFERENCE_DEVICE=ON ..
 ninja -j10
 ninja install
 
