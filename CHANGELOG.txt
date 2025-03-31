@@ -13,6 +13,11 @@ FEATURES
 
 CHANGELOG
 ==========
+* 04/01/2025
+    * Remove the python2 occurrences
+    * Updated submodules
+        * ot-commissioner 06adb26
+
 * 03/05/2025
     * Fix for deprecation of expired DHCPv6 lease prefixes 
     * Updated submodules
