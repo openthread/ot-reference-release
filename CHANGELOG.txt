@@ -13,12 +13,17 @@ FEATURES
 
 CHANGELOG
 ==========
-* 03/28/2025
+* 04/08/2025
     * Support of RA RDNSS
     * Updated submodules
         * openthread commitid: 4f11483
         * ot-br-posix commitid: f5c2554
         * ot-nrf528xx commitid: 282c067
+
+* 04/01/2025
+    * Remove the python2 occurrences
+    * Updated submodules
+        * ot-commissioner 06adb26
 
 * 03/05/2025
     * Fix for deprecation of expired DHCPv6 lease prefixes 

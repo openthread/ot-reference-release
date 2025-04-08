@@ -230,8 +230,9 @@ cmake --version
 
 pip3 install zeroconf
 
-apt-get install -y --no-install-recommends libgirepository1.0-dev python3-dev
-pip3 install dbus-python PyGObject
+apt-get install -y --no-install-recommends libgirepository1.0-dev
+pip3 install dbus-python==1.3.2
+pip3 install PyGObject
 
 su -c "${build_options[*]} script/setup" pi
 
@@ -244,10 +245,8 @@ fi
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     pip3 install -r /home/pi/repo/config/ncs/requirements-nrfutil.txt
     pip3 install --no-dependencies nrfutil==6.0.1
-    wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
-    sudo python2 get-pip.py
     apt-get install -y --no-install-recommends vim wiringpi
-    pip install wrapt==1.12.1
+    pip3 install wrapt==1.12.1
 
     # add calling of link_dongle.py script at startup to update symlink to the dongle
     sed -i '/exit 0/d' /etc/rc.local
