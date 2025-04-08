@@ -16,9 +16,9 @@ CHANGELOG
 * 04/08/2025
     * Support of RA RDNSS
     * Updated submodules
-        * openthread commitid: 4f11483
-        * ot-br-posix commitid: f5c2554
-        * ot-nrf528xx commitid: 282c067
+        * openthread commitid: c9c19aa
+        * ot-br-posix commitid: a5f8e53
+        * ot-nrf528xx commitid: 8ef210b
 
 * 04/01/2025
     * Remove the python2 occurrences
