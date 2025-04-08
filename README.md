@@ -17,7 +17,7 @@ $ git submodule update --init --recursive
 At the root of the repository:
 
 ```
-$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3|1.3.1)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] ./script/make-reference-release.bash
+$ REFERENCE_PLATFORM=(nrf52840|efr32mg12|ncs|none) REFERENCE_RELEASE_TYPE=(1.2|1.3|1.3.1)  [SD_CARD=/dev/...] [OTBR_RCP_BUS=(UART|SPI)] [IN_CHINA=(0|1)] [OTBR_RADIO_URL='spinel+hdlc+uart:///dev/ttyUSB0'] [OPENTHREAD_COMMIT_HASH=c9c19aa9fa5877cf1532c35a584618900e5c99c7] ./script/make-reference-release.bash
 ```
 
 This will produce a reference release folder in `./build/`. The folder will be
@@ -35,6 +35,8 @@ If this variable is not specified, the interface type is set to `UART` by defaul
 
 `OTBR_RADIO_URL` sets the otbr-agent's radio URL. If this variable is not specified,
 the otbr-agent's argument is set to `spinel+hdlc+uart:///dev/ttyACM0` by default.
+
+`OPENTHREAD_COMMIT_HASH` sets custom openthread commit SHA for NCS builds.
 
 For example, if you are in China and want to flash the built image to an SD card:
 
