@@ -295,6 +295,20 @@ deploy_ncs()
     git reset --hard "$commit_hash" || die "ERROR: unable to checkout the specified sdk-nrf commit."
     west update -n -o=--depth=1
     cd ..
+
+    if [[ -n ${OPENTHREAD_COMMIT_HASH:=} ]]; then
+        echo "Using custom OT SHA: ${OPENTHREAD_COMMIT_HASH?}"
+        cd modules/lib/openthread
+        # remove remote if exists to make clean repository
+        if git remote | grep -q openthread; then
+            git remote remove openthread
+        fi
+        git remote add openthread https://github.com/openthread/openthread.git
+        git fetch openthread
+        git checkout "$OPENTHREAD_COMMIT_HASH" || die "ERROR: unable to checkout the specified openthread commit."
+        cd ../../../
+    fi
+
     pip3 install --user -r zephyr/scripts/requirements.txt
     pip3 install --user -r nrf/scripts/requirements.txt
     pip3 install --user -r bootloader/mcuboot/scripts/requirements.txt
