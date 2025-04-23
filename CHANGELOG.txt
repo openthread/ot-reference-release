@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 05/16/2025
+    * Update mDNSResponder to latest 2600.100.147
+    * Updated submodules
+        * openthread commitid: fb0446f
+        * ot-br-posix commitid: e4e1d0c
+
 * 04/08/2025
     * Support of RA RDNSS
     * Updated submodules
