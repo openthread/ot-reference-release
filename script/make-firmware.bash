@@ -304,8 +304,8 @@ deploy_ncs()
             git remote remove openthread
         fi
         git remote add openthread https://github.com/openthread/openthread.git
-        git fetch openthread
-        git checkout "$OPENTHREAD_COMMIT_HASH" || die "ERROR: unable to checkout the specified openthread commit."
+        git fetch openthread "$OPENTHREAD_COMMIT_HASH"
+        git checkout FETCH_HEAD || die "ERROR: unable to checkout the specified openthread commit."
         cd ../../../
     fi
 
