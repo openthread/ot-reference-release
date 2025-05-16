@@ -13,6 +13,10 @@ FEATURES
 
 CHANGELOG
 ==========
+* 05/15/2025
+    * Updated submodules
+        * ot-commissioner commitid: f31a98a
+
 * 04/08/2025
     * Support of RA RDNSS
     * Updated submodules
