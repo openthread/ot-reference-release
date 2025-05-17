@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 05/16/2025
+    * Update mDNSResponder to latest 2600.100.147
+    * Updated submodules
+        * openthread commitid: fb0446f
+        * ot-br-posix commitid: e4e1d0c
+
 * 05/15/2025
     * Updated submodules
         * ot-commissioner commitid: f31a98a
