@@ -13,6 +13,13 @@ FEATURES
 
 CHANGELOG
 ==========
+* 05/21/2025
+    * New OT API to signal upstream DNS unavailability
+    * Updated submodules
+        * openthread commitid: 4071e32
+        * ot-br-posix commitid: a204b9e
+        * ot-nrf528xx commitid: 5d54f48
+
 * 05/16/2025
     * Update mDNSResponder to latest 2600.100.147
     * Updated submodules
