@@ -13,6 +13,13 @@ FEATURES
 
 CHANGELOG
 ==========
+* 06/03/2025
+    * Support of RDNSS link-local server address
+    * Updated submodules
+        * openthread commitid: ea3a3da
+        * ot-br-posix commitid: 153e800
+        * ot-nrf528xx commitid: 4966f65
+
 * 05/21/2025
     * New OT API to signal upstream DNS unavailability
     * Updated submodules
