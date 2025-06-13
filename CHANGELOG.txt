@@ -13,6 +13,13 @@ FEATURES
 
 CHANGELOG
 ==========
+* 06/13/2025
+    * Fix for routing issue of OMR prefix from DHCP6-PD
+    * Updated submodules
+        * openthread commitid: 8a19434
+        * ot-br-posix commitid: 2f3c799
+        * ot-nrf528xx commitid: 53d3205
+
 * 06/03/2025
     * Support of RDNSS link-local server address
     * Updated submodules
