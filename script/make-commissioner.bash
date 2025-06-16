@@ -37,7 +37,7 @@ pip3 install -r tools/commissioner_thci/requirements.txt
 mkdir -p build
 cd build
 
-/usr/local/bin/cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DOT_COMM_REFERENCE_DEVICE=ON ..
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr -DOT_COMM_REFERENCE_DEVICE=ON ..
 ninja -j10
 ninja install
 
