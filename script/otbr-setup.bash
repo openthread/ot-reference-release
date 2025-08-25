@@ -102,8 +102,6 @@ build_options=(
     "RELEASE=1"
     "REFERENCE_DEVICE=1"
     "BACKBONE_ROUTER=1"
-    "NETWORK_MANAGER=0"
-    "DHCPV6_PD=0"
     "WEB_GUI=0"
     "REST_API=0"
 )
