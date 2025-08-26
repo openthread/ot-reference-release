@@ -269,6 +269,9 @@ nrfutil_setup()
     fi
 
     $NRFUTIL install nrf5sdk-tools
+    $NRFUTIL install sdk-manager
+    $NRFUTIL install toolchain-manager
+    $NRFUTIL toolchain-manager install --ncs-version $(<"${script_dir}"'/../config/ncs/toolchain-version')
 
     # Generate private key
     if [ ! -f /tmp/private.pem ]; then
@@ -281,10 +284,6 @@ deploy_ncs()
     local commit_hash
     commit_hash=$(<"${script_dir}"'/../config/ncs/sdk-nrf-commit')
 
-    sudo apt install --no-install-recommends git cmake ninja-build gperf \
-        ccache dfu-util device-tree-compiler wget \
-        python3-dev python3-pip python3-setuptools python3-tk python3-wheel xz-utils file \
-        make gcc gcc-multilib g++-multilib libsdl2-dev
     pip3 install --user west
     mkdir -p "${script_dir}"/../ncs
     cd "${script_dir}"/../ncs
@@ -308,14 +307,6 @@ deploy_ncs()
         git checkout FETCH_HEAD || die "ERROR: unable to checkout the specified openthread commit."
         cd ../../../
     fi
-
-    pip3 install --user -r zephyr/scripts/requirements.txt
-    pip3 install --user -r nrf/scripts/requirements.txt
-    pip3 install --user -r bootloader/mcuboot/scripts/requirements.txt
-
-    # shellcheck disable=SC1091
-    source zephyr/zephyr-env.sh
-    west config manifest.path nrf
 }
 
 build_ncs()
@@ -349,7 +340,8 @@ build_ncs()
         local build_path="/tmp/ncs_${app}_${thread_version}"
         local hex_path="${build_path}/${sample_name}/zephyr/zephyr.hex"
 
-        west build -d "${build_path}" -b nrf52840dongle/nrf52840 -p always "${sample_path}" --sysbuild -- -DOVERLAY_CONFIG="${sample_config}"
+        $NRFUTIL sdk-manager toolchain launch --ncs-version $(<"${script_dir}"'/../config/ncs/toolchain-version') -- \
+            west build -d "${build_path}" -b nrf52840dongle/nrf52840 -p always "${sample_path}" --sysbuild -- -DOVERLAY_CONFIG="${sample_config}"
 
         distribute "${hex_path}" "${app}" "${thread_version}" "${timestamp}" "${commit_id}"
     done
