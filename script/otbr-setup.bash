@@ -99,6 +99,7 @@ readonly OTBR_THREAD_1_4_OPTIONS=(
 
 build_options=(
     "INFRA_IF_NAME=eth0"
+    "OTBR_MDNS=mDNSResponder"
     "RELEASE=1"
     "REFERENCE_DEVICE=1"
     "BACKBONE_ROUTER=1"
