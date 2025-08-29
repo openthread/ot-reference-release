@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 08/15/2025
+    * Updated submodules
+        * openthread commitid: 388f734
+        * ot-br-posix commitid: 1b2c0f0
+        * ot-nrf528xx commitid: f88ade8
+
 * 06/13/2025
     * Fix for routing issue of OMR prefix from DHCP6-PD
     * Updated submodules
