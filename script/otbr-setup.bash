@@ -237,7 +237,7 @@ pip3 install PyGObject
 
 su -c "${build_options[*]} script/setup" pi
 
-if [[ "$REFERENCE_RELEASE_TYPE" = "1.2" || "$REFERENCE_RELEASE_TYPE" = "1.3" || "$REFERENCE_RELEASE_TYPE" = "1.4" ]]; then
+if [[ $REFERENCE_RELEASE_TYPE == "1.2" || $REFERENCE_RELEASE_TYPE == "1.3" || $REFERENCE_RELEASE_TYPE == "1.4" ]]; then
     cd /home/pi/repo/
     ./script/make-commissioner.bash
 fi

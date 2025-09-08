@@ -184,7 +184,7 @@ build_ot()
     mkdir -p "$OUTPUT_ROOT"
 
     case "${thread_version}" in
-        "1.2"|"1.3"|"1.4")
+        "1.2" | "1.3" | "1.4")
             # Build OpenThread 1.2 or 1.3 or 1.4
             cd "${platform_repo}"
             git clean -xfd
