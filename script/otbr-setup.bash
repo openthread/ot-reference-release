@@ -67,8 +67,6 @@ readonly OTBR_THREAD_1_3_OPTIONS=(
     "-DOTBR_DUA_ROUTING=ON"
     "-DOT_DUA=ON"
     "-DOT_MLR=ON"
-    "-DOTBR_DNSSD_DISCOVERY_PROXY=ON"
-    "-DOTBR_SRP_ADVERTISING_PROXY=ON"
     "-DOT_BORDER_ROUTING=ON"
     "-DOT_SRP_CLIENT=ON"
     "-DOT_DNS_CLIENT=ON"
@@ -85,8 +83,6 @@ readonly OTBR_THREAD_1_4_OPTIONS=(
     "-DOTBR_DUA_ROUTING=ON"
     "-DOT_DUA=ON"
     "-DOT_MLR=ON"
-    "-DOTBR_DNSSD_DISCOVERY_PROXY=ON"
-    "-DOTBR_SRP_ADVERTISING_PROXY=ON"
     "-DOT_BORDER_ROUTING=ON"
     "-DOT_SRP_CLIENT=ON"
     "-DOT_DNS_CLIENT=ON"
@@ -99,7 +95,6 @@ readonly OTBR_THREAD_1_4_OPTIONS=(
 
 build_options=(
     "INFRA_IF_NAME=eth0"
-    "OTBR_MDNS=mDNSResponder"
     "RELEASE=1"
     "REFERENCE_DEVICE=1"
     "BACKBONE_ROUTER=1"
@@ -114,6 +109,7 @@ if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
         'BORDER_ROUTING=0'
         'NAT64=0'
         'DNS64=0'
+        'OTBR_MDNS=mDNSResponder'
     )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
@@ -143,6 +139,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
         'BORDER_ROUTING=1'
         'NAT64=0'
         'DNS64=0'
+        'OTBR_MDNS=openthread'
     )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
@@ -173,6 +170,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
         'NAT64=1'
         'DNS64=1'
         'DHCPV6_PD_REF=1'
+        'OTBR_MDNS=openthread'
     )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
