@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 09/16/2025
+    * fix raspbian check error
+        * openthread commitid: f4ff07e
+        * ot-br-posix commitid: 062a9a6
+        * ot-nrf528xx commitid: b1d81c9
+
 * 08/15/2025
     * Updated submodules
         * openthread commitid: 388f734
