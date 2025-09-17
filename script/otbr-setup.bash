@@ -217,7 +217,7 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-eval "DOCKER=1 ${build_options[*]} script/bootstrap"
+sh -c "DOCKER=1 ${build_options[*]} script/bootstrap"
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
