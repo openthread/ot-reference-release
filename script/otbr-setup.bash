@@ -233,7 +233,7 @@ apt-get install -y --no-install-recommends libgirepository1.0-dev
 pip3 install dbus-python==1.3.2
 pip3 install PyGObject
 
-eval "${build_options[*]} script/setup"
+sh -c "${build_options[*]} script/setup"
 
 if [[ "$REFERENCE_RELEASE_TYPE" = "1.2" || "$REFERENCE_RELEASE_TYPE" = "1.3" || "$REFERENCE_RELEASE_TYPE" = "1.4" ]]; then
     cd /home/pi/repo/
