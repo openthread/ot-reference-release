@@ -212,7 +212,7 @@ chown -R pi:pi /home/pi/repo
 cd /home/pi/repo/ot-br-posix
 apt-get update
 apt-get install -y --no-install-recommends git python3-pip
-su -c "DOCKER=1 ${build_options[*]} script/bootstrap" pi
+sh -c "DOCKER=1 ${build_options[*]} script/bootstrap"
 
 rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
@@ -228,7 +228,7 @@ apt-get install -y --no-install-recommends libgirepository1.0-dev
 pip3 install dbus-python==1.3.2
 pip3 install PyGObject
 
-su -c "${build_options[*]} script/setup" pi
+sh -c "${build_options[*]} script/setup"
 
 case "$REFERENCE_RELEASE_TYPE" in
     "1.2" | "1.3" | "1.4")
