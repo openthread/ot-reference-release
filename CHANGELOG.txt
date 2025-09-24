@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 09/24/2025
+    * Updated submodules to include systemd-networkd conf update
+        * openthread commitid: 27932f2
+        * ot-br-posix commitid: 71fb185
+        * ot-nrf528xx commitid: a33166c
+
 * 08/15/2025
     * Updated submodules
         * openthread commitid: 388f734
