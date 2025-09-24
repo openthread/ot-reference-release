@@ -252,7 +252,7 @@ After=otbr-agent.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/systemctl restart otbr-agent.service
+ExecStart=/bin/sh -c "sleep 5; /bin/systemctl restart otbr-agent.service"
 
 [Install]
 WantedBy=multi-user.target
