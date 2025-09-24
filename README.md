@@ -45,6 +45,7 @@ $ REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=1.2 IN_CHINA=1 SD_CARD=/dev
 ```
 
 When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following components:
+
 - Raspberry Pi image containing OTBR service and OT Commissioner
 - Firmware
 - THCI
@@ -52,6 +53,7 @@ When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following com
 - Quick start guide
 
 When `REFERENCE_RELEASE_TYPE` is `1.3` or `1.3.1`, reference release contains following components:
+
 - Raspberry Pi image containing OTBR service with border routing feature, service registry feature and OT Commissioner
 - Firmware
 - Change log

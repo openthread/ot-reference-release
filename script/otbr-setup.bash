@@ -105,96 +105,91 @@ build_options=(
 )
 
 if [ "${REFERENCE_RELEASE_TYPE?}" = "1.2" ]; then
-    build_options+=('OTBR_MDNS=mDNSResponder')
+    readonly LOCAL_OPTIONS_COMMON=(
+        'BORDER_ROUTING=0'
+        'NAT64=0'
+        'DNS64=0'
+        'OTBR_MDNS=mDNSResponder'
+    )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=0'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         ncs)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=0'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         *)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=0'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_2_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
     esac
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.3" ]; then
-    build_options+=('OTBR_MDNS=openthread')
+    readonly LOCAL_OPTIONS_COMMON=(
+        'BORDER_ROUTING=1'
+        'NAT64=0'
+        'DNS64=0'
+        'OTBR_MDNS=openthread'
+    )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         ncs)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         *)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=0'
-                'DNS64=0'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_3_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
     esac
 elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
-    build_options+=('OTBR_MDNS=openthread')
+    readonly LOCAL_OPTIONS_COMMON=(
+        'BORDER_ROUTING=1'
+        'NAT64=1'
+        'DNS64=1'
+        'DHCPV6_PD_REF=1'
+        'OTBR_MDNS=openthread'
+    )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=1'
-                'DNS64=1'
-                'DHCPV6_PD_REF=1'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_RCP_RESTORATION_MAX_COUNT=100 -DCMAKE_CXX_FLAGS='-DOPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US=5000'\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         ncs)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=1'
-                'DNS64=1'
-                'DHCPV6_PD_REF=1'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]} -DOT_PLATFORM_BOOTLOADER_MODE=ON\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
             ;;
         *)
             readonly LOCAL_OPTIONS=(
-                'BORDER_ROUTING=1'
-                'NAT64=1'
-                'DNS64=1'
-                'DHCPV6_PD_REF=1'
+                "${LOCAL_OPTIONS_COMMON[@]}"
                 "OTBR_OPTIONS=\"${OTBR_THREAD_1_4_OPTIONS[@]}\""
             )
             build_options+=("${LOCAL_OPTIONS[@]}")
@@ -235,10 +230,12 @@ pip3 install PyGObject
 
 sh -c "${build_options[*]} script/setup"
 
-if [[ "$REFERENCE_RELEASE_TYPE" = "1.2" || "$REFERENCE_RELEASE_TYPE" = "1.3" || "$REFERENCE_RELEASE_TYPE" = "1.4" ]]; then
-    cd /home/pi/repo/
-    ./script/make-commissioner.bash
-fi
+case "$REFERENCE_RELEASE_TYPE" in
+    "1.2" | "1.3" | "1.4")
+        cd /home/pi/repo/
+        ./script/make-commissioner.bash
+        ;;
+esac
 
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
