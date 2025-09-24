@@ -244,10 +244,21 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     apt-get install -y --no-install-recommends vim wiringpi
     pip3 install wrapt==1.12.1
 
-    # add calling of link_dongle.py script at startup to update symlink to the dongle
-    sed -i '/exit 0/d' /etc/rc.local
-    grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
-    echo 'exit 0' >>/etc/rc.local
+    # Restart otbr-agent as a workaround for nRF dongle not being ready.
+    cat <<EOF >/etc/systemd/system/otbr-agent-restart-workaround.service
+[Unit]
+Description=Restart otbr-agent as a workaround
+After=otbr-agent.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl restart otbr-agent.service
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl enable otbr-agent-restart-workaround.service
 
     # update testharness-discovery script to fix autodiscovery issue
     if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
