@@ -88,16 +88,17 @@ main()
     [ -d "$IMAGES_DIR" ] || mkdir -p "$IMAGES_DIR"
 
     # Download raspios image
-    RASPIOS_URL=https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip
+    RASPIOS_URL=https://downloads.raspberrypi.com/raspios_lite_armhf/images/raspios_lite_armhf-2025-05-13/2025-05-13-raspios-bookworm-armhf-lite.img.xz
     IMAGE_ARCHIVE=$(basename "${RASPIOS_URL}")
-    IMAGE_FILE=$(basename "${IMAGE_ARCHIVE}" .zip).img
     wget -q -O "$IMAGES_DIR/$IMAGE_ARCHIVE" -c "$RASPIOS_URL"
 
     # Extract the downloaded archive
     mime_type=$(file "$IMAGES_DIR/$IMAGE_ARCHIVE" --mime-type)
     if [[ $mime_type == *"application/zip"* ]]; then
-        unzip -o "$IMAGES_DIR/$IMAGE_ARCHIVE" -d $IMAGES_DIR
+        IMAGE_FILE=$(basename "${IMAGE_ARCHIVE}" .zip).img
+        unzip -o "$IMAGES_DIR/$IMAGE_ARCHIVE" -d "$IMAGES_DIR"
     elif [[ $mime_type == *"application/"* ]]; then
+        IMAGE_FILE=$(basename "${IMAGE_ARCHIVE}" .xz)
         xz -f -k -d "$IMAGES_DIR/$IMAGE_ARCHIVE"
     else
         echo "ERROR: Unrecognized archive type\n${mime_type}"

@@ -91,6 +91,7 @@ readonly OTBR_THREAD_1_4_OPTIONS=(
     "-DOTBR_TREL=ON"
     "-DOTBR_NAT64=ON"
     "-DOTBR_DHCP6_PD=ON"
+    "-DOT_BORDER_ROUTING_DHCP6_PD_CLIENT=ON"
 )
 
 build_options=(
@@ -169,7 +170,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
         'BORDER_ROUTING=1'
         'NAT64=1'
         'DNS64=1'
-        'DHCPV6_PD_REF=1'
+        'SYSTEMD_NETWORKD=1'
         'OTBR_MDNS=openthread'
     )
     case "${REFERENCE_PLATFORM}" in
@@ -200,9 +201,9 @@ fi
 configure_apt_source()
 {
     if [ "$IN_CHINA" = 1 ]; then
-        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi
-deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ buster main non-free contrib rpi' | sudo tee /etc/apt/sources.list
-        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ buster main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bookworm main non-free contrib rpi
+deb-src http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/ bookworm main non-free contrib rpi' | sudo tee /etc/apt/sources.list
+        echo 'deb http://mirrors.tuna.tsinghua.edu.cn/raspberrypi/ bookworm main ui' | sudo tee /etc/apt/sources.list.d/raspi.list
     fi
 }
 configure_apt_source
@@ -218,6 +219,10 @@ rm -rf /home/pi/repo/ot-br-posix/third_party/openthread/repo
 cp -rp /home/pi/repo/openthread /home/pi/repo/ot-br-posix/third_party/openthread/repo
 
 apt-get purge -y cmake
+
+python3 -m venv /home/pi/.venv-otbr
+source /home/pi/.venv-otbr/bin/activate
+
 pip3 install scikit-build
 pip3 install cmake==3.20.2
 cmake --version
@@ -226,7 +231,6 @@ pip3 install zeroconf
 
 apt-get install -y --no-install-recommends libgirepository1.0-dev
 pip3 install dbus-python==1.3.2
-pip3 install PyGObject
 
 sh -c "${build_options[*]} script/setup"
 
@@ -240,14 +244,27 @@ esac
 # nRF Connect SDK related actions
 if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     pip3 install -r /home/pi/repo/config/ncs/requirements-nrfutil.txt
-    pip3 install --no-dependencies nrfutil==6.0.1
-    apt-get install -y --no-install-recommends vim wiringpi
-    pip3 install wrapt==1.12.1
+    pip3 install --no-dependencies --ignore-requires-python nrfutil==6.0.1
 
-    # add calling of link_dongle.py script at startup to update symlink to the dongle
-    sed -i '/exit 0/d' /etc/rc.local
-    grep -qxF 'sudo systemctl restart otbr-agent.service' /etc/rc.local || echo 'sudo systemctl restart otbr-agent.service' >>/etc/rc.local
-    echo 'exit 0' >>/etc/rc.local
+    apt-get install -y --no-install-recommends vim
+
+    wget https://github.com/WiringPi/WiringPi/releases/download/3.16/wiringpi_3.16_armhf.deb
+    sudo dpkg -i ./wiringpi_3.16_armhf.deb
+
+    cat <<EOF >/etc/systemd/system/otbr-agent-restart-workaround.service
+[Unit]
+Description=Restart otbr-agent as a workaround
+After=otbr-agent.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl restart otbr-agent.service
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl enable otbr-agent-restart-workaround.service
 
     # update testharness-discovery script to fix autodiscovery issue
     if [ "$REFERENCE_RELEASE_TYPE" = "1.2" ]; then
@@ -260,5 +277,7 @@ elif [ "${REFERENCE_PLATFORM?}" = "efr32mg12" ]; then
     # update testharness-discovery script to fix autodiscovery issue
     sed -i "s/OpenThread_BR/OTS${REFERENCE_RELEASE_TYPE//./}_BR/g" /usr/sbin/testharness-discovery
 fi
+
+deactivate
 
 sync

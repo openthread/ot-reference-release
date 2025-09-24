@@ -284,7 +284,7 @@ deploy_ncs()
     local commit_hash
     commit_hash=$(<"${script_dir}"'/../config/ncs/sdk-nrf-commit')
 
-    pip3 install --user west
+    pip3 install west
     mkdir -p "${script_dir}"/../ncs
     cd "${script_dir}"/../ncs
     unset ZEPHYR_BASE
