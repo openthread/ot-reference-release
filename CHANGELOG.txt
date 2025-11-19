@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 11/19/2025
+    * Updated submodules to enable `mDNSResponder`
+        * openthread commitid: 76f3418
+        * ot-br-posix commitid: 72aa33a
+        * ot-nrf528xx commitid: b84cb87
+
 * 09/24/2025
     * Updated submodules to include systemd-networkd conf update
         * openthread commitid: 27932f2
