@@ -167,7 +167,7 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
         'BORDER_ROUTING=1'
         'NAT64=1'
         'DNS64=1'
-        'DHCPV6_PD_REF=1'
+        'OTBR_DHCP6_PD_CLIENT=dhcpcd'
         'OTBR_MDNS=openthread'
     )
     case "${REFERENCE_PLATFORM}" in
