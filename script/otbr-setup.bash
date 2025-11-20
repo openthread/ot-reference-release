@@ -167,8 +167,8 @@ elif [ "${REFERENCE_RELEASE_TYPE?}" = "1.4" ]; then
         'BORDER_ROUTING=1'
         'NAT64=1'
         'DNS64=1'
-        'DHCPV6_PD_REF=1'
         'OTBR_MDNS=openthread'
+        'OTBR_DHCP6_PD_CLIENT=dhcpcd'
     )
     case "${REFERENCE_PLATFORM}" in
         efr32mg12)
