@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 11/26/2025
+    * Updated submodules to include iproute2 rt_tables update
+        * openthread commitid: 4f38928
+        * ot-br-posix commitid: 7729fd3
+        * ot-nrf528xx commitid: 3b18be4
+
 * 11/19/2025
     * Updated submodules to enable `mDNSResponder`
         * openthread commitid: 76f3418
