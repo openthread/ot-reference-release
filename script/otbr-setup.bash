@@ -247,14 +247,17 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
 
     apt-get install -y --no-install-recommends vim
 
-    wget https://github.com/WiringPi/WiringPi/releases/download/3.16/wiringpi_3.16_armhf.deb
-    dpkg -i ./wiringpi_3.16_armhf.deb
-    rm ./wiringpi_3.16_armhf.deb
+    # TODO: Confirm if wiringpi is necessary for nrfutil to configure the dongle.
+    readonly WIRINGPI_VERSION="3.16"
+    readonly WIRINGPI_DEB="wiringpi_${WIRINGPI_VERSION}_armhf.deb"
+    wget "https://github.com/WiringPi/WiringPi/releases/download/${WIRINGPI_VERSION}/${WIRINGPI_DEB}"
+    sudo dpkg -i "./${WIRINGPI_DEB}"
+    rm "./${WIRINGPI_DEB}"
 
-    # add calling of link_dongle.py script at startup to update symlink to the dongle
+    # TODO: Confirm if restarting otbr-agent via rc.local is required for the dongle.
     if [ ! -f /etc/rc.local ]; then
-        echo '#!/bin/sh -e' | tee /etc/rc.local
-        echo 'exit 0' | tee -a /etc/rc.local
+        echo '#!/bin/sh -e' > /etc/rc.local
+        echo 'exit 0' >> /etc/rc.local
         chmod +x /etc/rc.local
     fi
     sed -i '/exit 0/d' /etc/rc.local
