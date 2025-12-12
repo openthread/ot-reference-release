@@ -248,7 +248,7 @@ if [ "${REFERENCE_PLATFORM?}" = "ncs" ]; then
     apt-get install -y --no-install-recommends vim
 
     wget https://github.com/WiringPi/WiringPi/releases/download/3.16/wiringpi_3.16_armhf.deb
-    sudo dpkg -i ./wiringpi_3.16_armhf.deb
+    dpkg -i ./wiringpi_3.16_armhf.deb
     rm ./wiringpi_3.16_armhf.deb
 
     # add calling of link_dongle.py script at startup to update symlink to the dongle
