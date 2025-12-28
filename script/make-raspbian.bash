@@ -81,6 +81,16 @@ main()
         "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash qemu
     fi
 
+    # Ensure unzip is installed
+    if ! command -v unzip >/dev/null; then
+        sudo apt-get install -y unzip
+    fi
+
+    # Ensure xz is installed
+    if ! command -v xz >/dev/null; then
+        sudo apt-get install -y xz-utils
+    fi
+
     # Ensure OUTPUT_ROOT exists
     mkdir -p "$OUTPUT_ROOT"
 
