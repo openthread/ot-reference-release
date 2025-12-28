@@ -81,14 +81,9 @@ main()
         "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash qemu
     fi
 
-    # Ensure unzip is installed
-    if ! command -v unzip >/dev/null; then
-        sudo apt-get install -y unzip
-    fi
-
-    # Ensure xz is installed
-    if ! command -v xz >/dev/null; then
-        sudo apt-get install -y xz-utils
+    # Ensure build dependencies are installed
+    if ! (command -v unzip >/dev/null && command -v xz >/dev/null); then
+        "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash packages
     fi
 
     # Ensure OUTPUT_ROOT exists
