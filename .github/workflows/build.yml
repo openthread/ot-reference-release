@@ -60,7 +60,7 @@ jobs:
       - name: Build ncs reference release for 1.4
         run: |
           REFERENCE_PLATFORM=ncs REFERENCE_RELEASE_TYPE=1.4 ./script/make-reference-release.bash
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: reference-releases
           path: |
