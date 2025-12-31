@@ -81,6 +81,11 @@ main()
         "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash qemu
     fi
 
+    # Ensure build dependencies are installed
+    if ! (command -v unzip >/dev/null && command -v xz >/dev/null); then
+        "${OT_REFERENCE_RELEASE}"/script/bootstrap.bash packages
+    fi
+
     # Ensure OUTPUT_ROOT exists
     mkdir -p "$OUTPUT_ROOT"
 
