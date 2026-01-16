@@ -13,6 +13,11 @@ FEATURES
 
 CHANGELOG
 ==========
+* 01/16/2026
+    * Fix python interpreter path issue in ot-commissioner service
+    * Updated submodules
+        * ot_commissioner commitid: 299e537
+
 * 11/26/2025
     * Updated submodules to include iproute2 rt_tables update
         * openthread commitid: 4f38928
