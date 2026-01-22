@@ -57,6 +57,7 @@ install_packages_apt()
         xz-utils \
         zip \
         python3-pip \
+        python3-venv \
         dcfldd \
         lsof
 }
@@ -84,7 +85,14 @@ install_packages_source()
 install_packages_pip3()
 {
     echo 'Installing python3 dependencies...'
-    pip3 install --upgrade -r "${repo_dir}/requirements.txt"
+    if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+        pip3 install --upgrade -r "${repo_dir}/requirements.txt"
+    else
+        if [[ ! -d "${repo_dir}/.venv" ]]; then
+            python3 -m venv "${repo_dir}/.venv"
+        fi
+        "${repo_dir}/.venv/bin/pip3" install --upgrade -r "${repo_dir}/requirements.txt"
+    fi
 }
 
 install_packages()
