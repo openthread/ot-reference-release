@@ -85,14 +85,14 @@ install_packages_source()
 install_packages_pip3()
 {
     echo 'Installing python3 dependencies...'
-local pip_executable="pip3"
-if [[ -z "${VIRTUAL_ENV:-}" ]]; then
-    if [[ ! -d "${repo_dir}/.venv" ]]; then
-        python3 -m venv "${repo_dir}/.venv"
+    local pip_executable="pip3"
+    if [[ -z ${VIRTUAL_ENV:-} ]]; then
+        if [[ ! -d "${repo_dir}/.venv" ]]; then
+            python3 -m venv "${repo_dir}/.venv"
+        fi
+        pip_executable="${repo_dir}/.venv/bin/pip3"
     fi
-    pip_executable="${repo_dir}/.venv/bin/pip3"
-fi
-"${pip_executable}" install --upgrade -r "${repo_dir}/requirements.txt"
+    "${pip_executable}" install --upgrade -r "${repo_dir}/requirements.txt"
 }
 
 install_packages()
