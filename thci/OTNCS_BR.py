@@ -46,7 +46,7 @@ from GRLLibs.UtilityModules.ModuleHelper import ModuleHelper
 from IThci import IThci
 from THCI.OTNCS import OpenThreadTHCI, watched, API
 
-RPI_FULL_PROMPT = 'pi@raspberrypi:~$ '
+RPI_FULL_PROMPT = ':~$ '
 RPI_USERNAME_PROMPT = 'raspberrypi login: '
 RPI_PASSWORD_PROMPT = 'Password: '
 """regex: used to split lines"""
@@ -117,15 +117,17 @@ class SSHHandle(object):
 
 class SerialHandle:
 
-    def __init__(self, port, baudrate):
+    def __init__(self, port, baudrate, username, password):
         self.port = port
+        self.username = username
+        self.password = password
         self.__handle = serial.Serial(port, baudrate, timeout=0)
 
         self.__lines = ['']
         assert len(self.__lines) >= 1, self.__lines
 
         self.log("inputing username ...")
-        self.__bashWriteLine('pi')
+        self.__bashWriteLine(self.username)
         deadline = time.time() + 20
         loginOk = False
         while time.time() < deadline:
@@ -140,20 +142,20 @@ class SerialHandle:
 
                 lastLine = line
 
-            if lastLine == RPI_FULL_PROMPT:
+            if lastLine and lastLine.endswith(RPI_FULL_PROMPT):
                 self.log("prompt found, login success!")
                 loginOk = True
                 break
 
             if lastLine == RPI_PASSWORD_PROMPT:
                 self.log("inputing password ...")
-                self.__bashWriteLine('raspberry')
+                self.__bashWriteLine(self.password)
             elif lastLine == RPI_USERNAME_PROMPT:
                 self.log("inputing username ...")
-                self.__bashWriteLine('pi')
+                self.__bashWriteLine(self.username)
             elif not lastLine:
                 self.log("inputing username ...")
-                self.__bashWriteLine('pi')
+                self.__bashWriteLine(self.username)
 
         if not loginOk:
             raise Exception('login fail')
@@ -299,7 +301,7 @@ class OTNCS_BR(OpenThreadTHCI, IThci):
         if self.connectType == 'ip':
             self.__handle = SSHHandle(self.telnetIp, self.telnetPort, self.telnetUsername, self.telnetPassword)
         else:
-            self.__handle = SerialHandle(self.port, 115200)
+            self.__handle = SerialHandle(self.port, 115200, self.telnetUsername, self.telnetPassword)
 
         self.__afterConnect()
 
