@@ -158,6 +158,12 @@ main()
     fi
     sudo touch "$QEMU_ROOT"/boot/ssh && sync && sleep 1
 
+    # Create userconf.txt for headless setup (Bookworm requirement)
+    # This pre-configures the 'pi' user with a password to bypass the first-boot wizard.
+    # The password hash is produced with SHA-512 ("openssl passwd -6").
+    PASSWD_HASH=$(openssl passwd -6 "${PI_PASSWORD?PI_PASSWORD environment variable is not set}")
+    echo "pi:${PASSWD_HASH}" | sudo tee "$QEMU_ROOT/boot/userconf.txt" >/dev/null
+
     # Shrink .img
     if [[ ! -f /usr/bin/pishrink.sh ]]; then
         sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh

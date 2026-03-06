@@ -62,7 +62,7 @@ main()
     # Build raspbian
     # ==========================================================================
     mkdir -p "$OUTPUT_ROOT"
-    OUTPUT_ROOT="$OUTPUT_ROOT" ./script/make-raspbian.bash
+    OUTPUT_ROOT="$OUTPUT_ROOT" PI_PASSWORD="raspberry" ./script/make-raspbian.bash
 
     # ==========================================================================
     # Package docs
