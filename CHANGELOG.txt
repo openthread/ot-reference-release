@@ -13,6 +13,12 @@ FEATURES
 
 CHANGELOG
 ==========
+* 03/03/2026
+    * Updated submodules
+        * openthread commitid: cf1d23c
+        * ot-br-posix commitid: 44d4079
+        * ot-nrf528xx commitid: f1246db
+
 * 01/16/2026
     * Fix python interpreter path issue in ot-commissioner service
     * Updated submodules
