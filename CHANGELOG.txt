@@ -13,6 +13,11 @@ FEATURES
 
 CHANGELOG
 ==========
+* 03/11/2026
+    * Fix python path variable typo in ot-commissioner CMakeLists
+    * Updated submodules
+        * ot-commissioner commitid: 03f4bef
+
 * 03/03/2026
     * Updated submodules
         * openthread commitid: cf1d23c
