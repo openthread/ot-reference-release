@@ -44,7 +44,7 @@ For example, if you are in China and want to flash the built image to an SD card
 $ REFERENCE_PLATFORM=nrf52840 REFERENCE_RELEASE_TYPE=1.2 IN_CHINA=1 SD_CARD=/dev/sda ./script/make-reference-release.bash
 ```
 
-When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following components:
+When `REFERENCE_RELEASE_TYPE` is `1.2`, the reference release contains the following components:
 
 - Raspberry Pi image containing OTBR service and OT Commissioner
 - Firmware
@@ -52,7 +52,7 @@ When `REFERENCE_RELEASE_TYPE` is `1.2`, reference release contains following com
 - Change log
 - Quick start guide
 
-When `REFERENCE_RELEASE_TYPE` is `1.3` or `1.3.1`, reference release contains following components:
+When `REFERENCE_RELEASE_TYPE` is `1.3` or `1.3.1`, the reference release contains the following components:
 
 - Raspberry Pi image containing OTBR service with border routing feature, service registry feature and OT Commissioner
 - Firmware
