@@ -48,7 +48,7 @@ jobs:
           tar xjf gcc-arm.tar.bz2
           echo "PATH=/tmp/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH" >> "$GITHUB_ENV"
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
       - name: Build nrf52840 reference release for 1.2
