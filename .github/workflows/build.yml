@@ -43,14 +43,71 @@ jobs:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
       - name: Bootstrap
+        timeout-minutes: 15
         run: |
-          cd /tmp
-          sudo apt-get update
-          sudo apt-get --no-install-recommends install -y ninja-build gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-          wget --tries 4 --quiet https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2 -O gcc-arm.tar.bz2
-          echo "bcd840f839d5bf49279638e9f67890b2ef3a7c9c7a9b25271e83ec4ff41d177a  gcc-arm.tar.bz2" | sha256sum -c
-          tar xjf gcc-arm.tar.bz2
-          echo "PATH=/tmp/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH" >> "$GITHUB_ENV"
+          set -euo pipefail
+
+          apt_opts=(
+            -o Acquire::Retries=3
+            -o Acquire::http::Timeout=15
+            -o Acquire::https::Timeout=15
+          )
+          sudo apt-get "${apt_opts[@]}" update
+          sudo apt-get "${apt_opts[@]}" --no-install-recommends install -y \
+            bzip2 \
+            ca-certificates \
+            curl \
+            g++-arm-linux-gnueabihf \
+            gcc-arm-linux-gnueabihf \
+            ninja-build
+
+          toolchain_dir="/tmp/gcc-arm-none-eabi-9-2019-q4-major"
+          toolchain_sha256="bcd840f839d5bf49279638e9f67890b2ef3a7c9c7a9b25271e83ec4ff41d177a"
+          toolchain_urls=(
+            "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2"
+            "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/9-2019q4/RC2.1/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2"
+          )
+
+          if [[ ! -x "${toolchain_dir}/bin/arm-none-eabi-gcc" ]]; then
+            (
+              umask 022
+              stage_dir="$(mktemp -d /tmp/.ot-arm-toolchain.XXXXXX)"
+              trap 'rm -rf "${stage_dir}"' EXIT
+
+              archive_path="${stage_dir}/gcc-arm.tar.bz2"
+              extract_dir="${stage_dir}/extracted"
+              installed=0
+
+              for url in "${toolchain_urls[@]}"; do
+                rm -rf "${archive_path}" "${extract_dir}"
+                mkdir -p "${extract_dir}"
+                echo "Downloading Arm toolchain from '${url}'..."
+                if curl --proto '=https' --tlsv1.2 -fsSL \
+                    --retry 2 --retry-delay 2 --retry-max-time 80 \
+                    --connect-timeout 15 --max-time 75 \
+                    --speed-limit 1048576 --speed-time 15 \
+                    -o "${archive_path}" "${url}" \
+                  && echo "${toolchain_sha256}  ${archive_path}" | sha256sum -c - \
+                  && tar --no-same-owner -xjf "${archive_path}" -C "${extract_dir}" --strip-components=1 \
+                  && chmod 0755 "${extract_dir}" \
+                  && [[ -x "${extract_dir}/bin/arm-none-eabi-gcc" ]]; then
+                  installed=1
+                  break
+                fi
+                echo "WARNING: failed to download, verify, or extract Arm toolchain from '${url}'" >&2
+              done
+
+              if [[ ${installed} -ne 1 ]]; then
+                echo "ERROR: failed to install Arm toolchain into '${toolchain_dir}'" >&2
+                exit 1
+              fi
+
+              rm -rf "${toolchain_dir}"
+              mv "${extract_dir}" "${toolchain_dir}"
+            )
+          fi
+
+          echo "${toolchain_dir}/bin" >> "${GITHUB_PATH}"
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
