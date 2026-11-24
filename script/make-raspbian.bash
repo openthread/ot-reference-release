@@ -53,19 +53,118 @@ fi
 STAGE_DIR=/tmp/raspbian
 QEMU_ROOT=${OT_REFERENCE_RELEASE}/mnt-rpi
 IMAGES_DIR="${IMAGES_DIR-"${HOME}/.cache/tools/images"}"
+STAGING_IMAGE_FILE=""
+
+detach_loop_devices()
+{
+    local image_file
+    local loop_devs
+    local loop_dev
+    local i
+
+    if [[ -z ${1:-} ]]; then
+        return 0
+    fi
+
+    image_file=$(realpath -m "$1" 2>/dev/null || echo "$1")
+
+    for ((i = 0; i < 30; i++)); do
+        loop_devs=$(sudo losetup -j "$image_file" 2>/dev/null | cut -d: -f1 || true)
+        if [[ -z $loop_devs ]]; then
+            return 0
+        fi
+
+        while IFS= read -r loop_dev; do
+            if [[ -n $loop_dev ]]; then
+                sudo losetup -d "$loop_dev" 2>/dev/null || true
+            fi
+        done <<<"$loop_devs"
+
+        if command -v udevadm >/dev/null 2>&1; then
+            sudo udevadm settle 2>/dev/null || true
+        fi
+
+        loop_devs=$(sudo losetup -j "$image_file" 2>/dev/null | cut -d: -f1 || true)
+        if [[ -z $loop_devs ]]; then
+            return 0
+        fi
+
+        sleep 0.5
+    done
+
+    echo "ERROR: Timed out waiting for loop devices to detach for $image_file: $loop_devs" >&2
+    return 1
+}
+
+kill_mount_processes()
+{
+    local target_dir="${1:-}"
+    local resolved_dir
+    local pid
+
+    if [[ -z $target_dir ]]; then
+        return 1
+    fi
+
+    resolved_dir=$(realpath -m "$target_dir" 2>/dev/null || true)
+    if [[ -z $resolved_dir ]] || [[ $resolved_dir == "/" ]]; then
+        return 1
+    fi
+
+    while IFS= read -r pid; do
+        if [[ $pid =~ ^[0-9]+$ ]] && [[ $pid -ne $$ ]] && [[ $pid -ne $PPID ]]; then
+            sudo kill -9 "$pid" 2>/dev/null || true
+        fi
+    done < <(sudo lsof -t "$resolved_dir" 2>/dev/null || true)
+}
+
+unmount_image()
+{
+    local i
+    local resolved_root
+
+    if [[ -z ${QEMU_ROOT:-} ]]; then
+        echo "ERROR: QEMU_ROOT is empty" >&2
+        return 1
+    fi
+
+    resolved_root=$(realpath -m "$QEMU_ROOT")
+    if [[ -z $resolved_root ]] || [[ $resolved_root == "/" ]]; then
+        echo "ERROR: Refusing to unmount root directory" >&2
+        return 1
+    fi
+
+    if mountpoint -q "$resolved_root" 2>/dev/null; then
+        sync
+
+        kill_mount_processes "$resolved_root"
+
+        # Teardown QEMU machine
+        sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/qemu-cleanup.sh "$resolved_root" || true
+
+        # Unmount
+        for ((i = 0; i < 10; i++)); do
+            if sudo umount -R "$resolved_root" 2>/dev/null || ! mountpoint -q "$resolved_root" 2>/dev/null; then
+                break
+            fi
+
+            kill_mount_processes "$resolved_root"
+
+            sleep 0.5
+        done
+
+        if mountpoint -q "$resolved_root" 2>/dev/null; then
+            sudo umount -f -R "$resolved_root"
+        fi
+    fi
+
+    detach_loop_devices "${STAGING_IMAGE_FILE:-}"
+}
 
 cleanup()
 {
     set +e
-    for pid in $(sudo lsof -t "$QEMU_ROOT"); do
-        sudo kill -9 "$pid"
-    done
-
-    # Teardown QEMU machine
-    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/qemu-cleanup.sh "$QEMU_ROOT" || true
-
-    # Unmount
-    sudo umount -f -R "$QEMU_ROOT" || true
+    unmount_image || true
     set -e
 }
 
@@ -114,7 +213,8 @@ main()
     # Ensure STAGE_DIR exists. Create a copy of IMAGE_FILE in STAGE_DIR
     [ -d "$STAGE_DIR" ] || mkdir -p "$STAGE_DIR"
 
-    export STAGING_IMAGE_FILE="$STAGE_DIR/otbr.${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d).ot_${OPENTHREAD_COMMIT_HASH}.ot-br_${OT_BR_POSIX_COMMIT_HASH}.img"
+    STAGING_IMAGE_FILE="$STAGE_DIR/otbr.${REFERENCE_RELEASE_TYPE?}-$(date +%Y%m%d).ot_${OPENTHREAD_COMMIT_HASH}.ot-br_${OT_BR_POSIX_COMMIT_HASH}.img"
+    export STAGING_IMAGE_FILE
     cp "$IMAGES_DIR/$IMAGE_FILE" "$STAGING_IMAGE_FILE"
 
     # Expand IMAGE_FILE by EXPAND_SIZE
@@ -123,12 +223,13 @@ main()
     dd if=/dev/zero bs=1M count=$EXPAND_SIZE >>"$STAGING_IMAGE_FILE"
     ls -alh "$STAGING_IMAGE_FILE"
     sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/expand.sh "$STAGING_IMAGE_FILE" "$EXPAND_SIZE"
+    detach_loop_devices "$STAGING_IMAGE_FILE"
 
     # Create mount dir
     mkdir -p "$QEMU_ROOT"
 
     # Mount .img
-    sudo "${OT_REFERENCE_RELEASE}"/docker-rpi-emu/scripts/mount.sh "$STAGING_IMAGE_FILE" $QEMU_ROOT
+    "${OT_REFERENCE_RELEASE}"/script/mount.bash "$STAGING_IMAGE_FILE" "$QEMU_ROOT"
 
     # Mount /etc/resolv.conf
     if [ -f "/etc/resolv.conf" ]; then
@@ -164,6 +265,9 @@ main()
     PASSWD_HASH=$(openssl passwd -6 "${PI_PASSWORD?PI_PASSWORD environment variable is not set}")
     echo "pi:${PASSWD_HASH}" | sudo tee "$QEMU_ROOT/boot/userconf.txt" >/dev/null
 
+    # Unmount image and detach loop devices before shrinking and archiving
+    unmount_image
+
     # Shrink .img
     if [[ ! -f /usr/bin/pishrink.sh ]]; then
         sudo wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh -O /usr/bin/pishrink.sh && sudo chmod a+x /usr/bin/pishrink.sh
@@ -176,6 +280,7 @@ main()
         exit $ret_val
     fi
     set -e
+    detach_loop_devices "$STAGING_IMAGE_FILE"
 
     # Write .img to SD Card
     if [[ -n ${SD_CARD:=} ]]; then

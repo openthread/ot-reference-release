@@ -44,21 +44,61 @@ if [ ! -d "$2" ]; then
     exit 2
 fi
 
-echo "Attempting to mount $1 to $2"
+IMAGE_FILE="$1"
+MOUNT_POINT="$2"
 
-set -e
+if mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
+    echo "Mount point $MOUNT_POINT is already mounted" >&2
+    exit 2
+fi
+
+echo "Attempting to mount $IMAGE_FILE to $MOUNT_POINT"
+
+LOOP_BASE=""
+MOUNTED=0
+
+cleanup()
+{
+    if [ "$MOUNTED" -ne 1 ]; then
+        set +e
+        if mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
+            sudo umount -R "$MOUNT_POINT" 2>/dev/null || sudo umount -f -R "$MOUNT_POINT" 2>/dev/null || true
+        fi
+        if [ -n "$LOOP_BASE" ]; then
+            sudo losetup -d "$LOOP_BASE" 2>/dev/null || true
+        fi
+    fi
+}
+
+trap cleanup EXIT
 
 # Attach loopback device
-LOOP_BASE=$(sudo losetup -f -P --show "$1")
+LOOP_BASE=$(sudo losetup -f -P --show "$IMAGE_FILE")
 
 echo "Attached base loopback at: $LOOP_BASE"
 
 P1_NAME=${LOOP_BASE}p1
 P2_NAME=${LOOP_BASE}p2
 
-# Mount image with the offsets determined above
-mkdir -p "$2"
-sudo mount "$P2_NAME" -o rw "$2"
-sudo mount "$P1_NAME" -o rw "$2"/boot
+if command -v udevadm >/dev/null 2>&1; then
+    sudo udevadm settle 2>/dev/null || true
+fi
 
-echo "Mounted to $2 and $2/boot"
+for ((i = 0; i < 20; i++)); do
+    if [ -b "$P1_NAME" ] && [ -b "$P2_NAME" ]; then
+        break
+    fi
+    sleep 0.2
+done
+
+if [ ! -b "$P1_NAME" ] || [ ! -b "$P2_NAME" ]; then
+    echo "Partition devices $P1_NAME and $P2_NAME did not appear" >&2
+    exit 3
+fi
+
+# Mount partitions from the attached loopback device
+sudo mount "$P2_NAME" -o rw "$MOUNT_POINT"
+sudo mount "$P1_NAME" -o rw "$MOUNT_POINT"/boot
+MOUNTED=1
+
+echo "Mounted to $MOUNT_POINT and $MOUNT_POINT/boot"
